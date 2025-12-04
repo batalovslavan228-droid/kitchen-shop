@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Смарт-чайник "AquaHeat" - Магазин Кухонной Техники</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-top-row">
+            <a href="index.html" class="logo">
+    <div class="logo-icon"><i class="fas fa-blender"></i></div>
+    <div class="logo-text">KITCHEN<span>POT</span></div>
+</a>
+            <form class="search-bar">
+                <input type="text" placeholder="Введите артикул или название товара...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+            <div class="header-icons">
+                <a href="#" aria-label="Избранное"><i class="far fa-heart"></i></a>
+                <a href="login.html" id="profile-link" aria-label="Профиль"><i class="far fa-user"></i></a>
+                <a href="cart.html" aria-label="Корзина"><i class="fas fa-shopping-cart"></i></a>
+            </div>
+        </div>
+        <div class="header-bottom-row">
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="catalog.html">Товары</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                    <li><a href="cart.html">Корзина</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <nav class="breadcrumbs">
+            <a href="index.html">Главная</a> / 
+            <a href="catalog.html">Каталог</a> / 
+            <span>Смарт-чайник "AquaHeat"</span>
+        </nav>
+
+        <div class="product-details">
+            <div class="product-image">
+                
+                <div class="gallery-main-wrapper">
+                    <div class="gallery-arrow prev"><i class="fas fa-chevron-left"></i></div>
+                    <img src="images/kettle.jpg" id="main-product-img" alt="Большое фото чайника">
+                    <div class="gallery-arrow next"><i class="fas fa-chevron-right"></i></div>
+                </div>
+
+                <div class="gallery-thumbs">
+                    <img src="images/kettle.jpg" class="gallery-thumb active" alt="Основное">
+                    
+                    <img src="images/kettle-1.jpg" class="gallery-thumb" alt="Вид сбоку">
+                    <img src="images/kettle-2.jpg" class="gallery-thumb" alt="Вид сверху">
+                    <img src="images/kettle-3.jpg" class="gallery-thumb" alt="В интерьере">
+                    <img src="images/kettle-4.jpg" class="gallery-thumb" alt="Детали">
+                </div>
+
+            </div>
+
+            <div class="product-info">
+                <h1>Смарт-чайник "AquaHeat"</h1>
+                
+                <h2>Описание товара</h2>
+                <p>Идеальная температура для любого напитка. Управляйте чайником со смартфона или голосом через Алису. Функция поддержания температуры в течение часа.</p>
+                <p>Двойные стенки корпуса не дают обжечься и дольше сохраняют тепло.</p>
+                
+                <h2>Характеристики</h2>
+                <ul>
+                    <li>Мощность: 2200 Вт</li>
+                    <li>Материал корпуса: Нержавеющая сталь, пластик</li>
+                    <li>Объем чаши: 1.7 л</li>
+                    <li>Управление: Wi-Fi, голосовой помощник Алиса</li>
+                    <li>Регулировка температуры: 40-100°C</li>
+                    <li>Гарантия: 2 года</li>
+                </ul>
+                
+                <p class="price">Цена: 7 490 руб.</p>
+                
+                <button class="buy-button" id="buy-now-btn"><i class="fas fa-cart-plus"></i> Добавить в корзину</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <div class="footer-logo-section">
+                    <img src="images/logo.png" alt="Лого">
+                </div>
+                <p>Интернет-магазин лучшей кухонной техники. Готовьте с удовольствием!</p>
+            </div>
+            <div class="footer-column">
+                <h3>Разделы сайта</h3>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="catalog.html">Каталог товаров</a></li>
+                    <li><a href="#">Гарантия и возврат</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Каталог</h3>
+                <ul>
+                    <li><a href="#">Блендеры</a></li>
+                    <li><a href="#">Чайники</a></li>
+                    <li><a href="#">Тостеры</a></li>
+                </ul>
+            </div>
+            <div class="footer-column footer-contacts">
+                <h3>Контакты</h3>
+                <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Техническая, д. 1</p>
+                <p><i class="fas fa-phone-alt"></i> +7 (495) 123-45-67</p>
+                <p><i class="fas fa-envelope"></i> info@kitchenshop.ru</p>
+                <p><i class="fas fa-clock"></i> Ежедневно 10:00-21:00</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Copyright © 2025. ООО «КухняТех». Все права защищены</p>
+            <p><a href="#">Политика обработки персональных данных</a></p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

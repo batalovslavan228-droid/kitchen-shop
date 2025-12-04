@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Избранное - Магазин Кухонной Техники</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-top-row">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><i class="fas fa-blender"></i></div>
+                <div class="logo-text">KITCHEN<span>POT</span></div>
+            </a>
+            <form class="search-bar">
+                <input type="text" placeholder="Введите артикул или название товара...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+            <div class="header-icons">
+                <a href="favorites.html" class="active-icon" aria-label="Избранное"><i class="far fa-heart"></i></a>
+                <a href="login.html" id="profile-link" aria-label="Профиль"><i class="far fa-user"></i></a>
+                <a href="cart.html" aria-label="Корзина"><i class="fas fa-shopping-cart"></i></a>
+            </div>
+        </div>
+        <div class="header-bottom-row">
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="catalog.html">Товары</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <nav class="breadcrumbs">
+            <a href="index.html">Главная</a> / <span>Избранное</span>
+        </nav>
+
+        <h1>Избранные товары</h1>
+
+        <div class="product-grid" id="favorites-container">
+            <p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #777;">
+                В избранном пока пусто. Перейдите в <a href="catalog.html" style="color: #E24C55;">каталог</a>, чтобы добавить товары.
+            </p>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <div class="footer-logo-section">
+                    <a href="index.html" class="logo">
+                        <div class="logo-icon"><i class="fas fa-blender"></i></div>
+                        <div class="logo-text">KITCHEN<span>POT</span></div>
+                    </a>
+                </div>
+                <p>Интернет-магазин лучшей кухонной техники.</p>
+            </div>
+            <div class="footer-column">
+                <h3>Разделы сайта</h3>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="catalog.html">Каталог товаров</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                </ul>
+            </div>
+            <div class="footer-column footer-contacts">
+                <h3>Контакты</h3>
+                <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Техническая, д. 1</p>
+                <p><i class="fas fa-phone-alt"></i> +7 (495) 123-45-67</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Copyright © 2025. ООО «КухняТех».</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

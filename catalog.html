@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог - Магазин Кухонной Техники</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-top-row">
+            <a href="index.html" class="logo">
+    <div class="logo-icon"><i class="fas fa-blender"></i></div>
+    <div class="logo-text">KITCHEN<span>POT</span></div>
+</a>
+            <form class="search-bar">
+                <input type="text" placeholder="Введите артикул или название товара...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+            <div class="header-icons">
+                <a href="favorites.html" aria-label="Избранное"><i class="far fa-heart"></i></a>
+                
+                <a href="login.html" id="profile-link" aria-label="Профиль"><i class="far fa-user"></i></a>
+                
+                <a href="cart.html" aria-label="Корзина"><i class="fas fa-shopping-cart"></i></a>
+            </div>
+        </div>
+        <div class="header-bottom-row">
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="catalog.html">Товары</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                    <li><a href="cart.html">Корзина</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <nav class="breadcrumbs">
+            <a href="index.html">Главная</a> / <span>Каталог</span>
+        </nav>
+        
+        <h1>Каталог товаров</h1>
+        
+        <div class="sorting-bar">
+             <span>Найдено товаров: 20</span>
+             <div class="sort-options">
+                 <select>
+                     <option>Сортировать по: Популярности</option>
+                     <option>Сортировать по: Цене (возрастание)</option>
+                     <option>Сортировать по: Цене (убывание)</option>
+                 </select>
+             </div>
+        </div>
+
+        <div class="catalog-layout">
+            
+            <aside class="filters">
+                <h2>Фильтры</h2>
+                <div class="filter-section">
+                    <h3>Цена</h3>
+                    <label>от <input type="number" placeholder="1000"></label>
+                    <label>до <input type="number" placeholder="50000"></label>
+                </div>
+                <div class="filter-section">
+                    <h3>Бренд</h3>
+                    <label><input type="checkbox"> Bosch</label>
+                    <label><input type="checkbox"> Tefal</label>
+                    <label><input type="checkbox"> Redmond</label>
+                </div>
+                <div class="filter-section">
+                    <h3>Категория</h3>
+                    <label><input type="radio" name="category" checked> Все</label>
+                    <label><input type="radio" name="category"> Блендеры</label>
+                    <label><input type="radio" name="category"> Чайники</label>
+                    <label><input type="radio" name="category"> Тостеры</label>
+                </div>
+                <div class="filter-buttons">
+                    <button class="apply-filters">Применить</button>
+                    <button class="reset-filters">Сбросить</button>
+                </div>
+            </aside>
+
+            <div class="product-grid">
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod1-toggle" class="product-toggle">
+                    <a href="product-blender.html" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="discount-badge">-30%</div>
+                            <div class="image-overlay"><span class="article">Арт: 515314</span><span class="category">Блендеры</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/blender.jpg" alt="Блендер">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Умный Блендер "ProMix 5000"</h3>
+                            <div class="price-container"><span class="old-price">22 990 р.</span><span class="price">15 990 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod1-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Мощность: 1500 Вт</li><li>Объем: 2 л</li></ul>
+                        <a href="product-blender.html" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod2-toggle" class="product-toggle">
+                    <a href="product-kettle.html" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 515315</span><span class="category">Чайники</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/kettle.jpg" alt="Чайник">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Смарт-чайник "AquaHeat"</h3>
+                            <div class="price-container"><span class="price">7 490 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod2-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Мощность: 2200 Вт</li><li>Объем: 1.7 л</li></ul>
+                        <a href="product-kettle.html" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod3-toggle" class="product-toggle">
+                    <a href="product-toaster.html" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 515316</span><span class="category">Тостеры</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/toaster.jpg" alt="Тостер">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Тостер "GoldCrust"</h3>
+                            <div class="price-container"><span class="price">4 990 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod3-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Кол-во слотов: 2</li><li>Материал: металл</li></ul>
+                        <a href="product-toaster.html" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod4-toggle" class="product-toggle">
+                    <a href="product-mixer.html" class="product-clickable-area"> <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 515317</span><span class="category">Миксеры</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/mixer.jpg" alt="Миксер">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Планетарный Миксер "Chef Pro"</h3>
+                            <div class="price-container"><span class="price">12 990 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod4-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Мощность: 1200 Вт</li><li>Чаша: 5 л</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a> </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod5-toggle" class="product-toggle">
+                    <a href="product-grill.html" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 515318</span><span class="category">Грили</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/grill.jpg" alt="Гриль">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Электрогриль "SteakMaster"</h3>
+                            <div class="price-container"><span class="price">9 990 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod5-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Мощность: 2000 Вт</li><li>Антипригарное покрытие</li></ul>
+                        <a href="product-grill.html" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod6-toggle" class="product-toggle">
+                    <a href="product-meatgrinder.html" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay">
+                                <span class="article">Арт: 515319</span>
+                                <span class="category">Мясорубки</span>
+                                <i class="far fa-heart favorite-icon"></i>
+                            </div>
+                            <img src="images/meatgrinder.jpg" alt="Мясорубка">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Мясорубка "Краснодарская-М1"</h3>
+                            <div class="price-container">
+                                <span class="old-price">6 990 р.</span>
+                                <span class="price">5 490 р.</span>
+                            </div>
+                        </div>
+                    </a>
+                    <label for="prod6-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul>
+                            <li>Мощность: 1500 Вт</li>
+                            <li>Произв.: 2 кг/мин</li>
+                            <li>Реверс: Есть</li>
+                        </ul>
+                        <a href="product-meatgrinder.html" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod7-toggle" class="product-toggle">
+                    <a href="product-steamer.html" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay">
+                                <span class="article">Арт: 515320</span>
+                                <span class="category">Пароварки</span>
+                                <i class="far fa-heart favorite-icon"></i>
+                            </div>
+                            <img src="images/steamer.jpg" alt="Пароварка">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Пароварка "Cuisine Royal 7"</h3>
+                            <div class="price-container">
+                                <span class="old-price">4 590 р.</span>
+                                <span class="price">3 490 р.</span>
+                            </div>
+                        </div>
+                    </a>
+                    <label for="prod7-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul>
+                            <li>Мощность: 800 Вт</li>
+                            <li>Объем: 9 л</li>
+                            <li>Ярусов: 3</li>
+                        </ul>
+                        <a href="product-steamer.html" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod8-toggle" class="product-toggle">
+                    <a href="product-juicer.html" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay">
+                                <span class="article">Арт: 515321</span>
+                                <span class="category">Соковыжималки</span>
+                                <i class="far fa-heart favorite-icon"></i>
+                            </div>
+                            <img src="images/juicer.jpg" alt="Соковыжималка">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Соковыжималка "VitaminPress"</h3>
+                            <div class="price-container">
+                                <span class="old-price">8 990 р.</span>
+                                <span class="price">6 990 р.</span>
+                            </div>
+                        </div>
+                    </a>
+                    <label for="prod8-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul>
+                            <li>Мощность: 1000 Вт</li>
+                            <li>Скорости: 2</li>
+                            <li>Горловина: 75 мм</li>
+                        </ul>
+                        <a href="product-juicer.html" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod9-toggle" class="product-toggle">
+                    <a href="product-airfryer.html" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay">
+                                <span class="article">Арт: 515322</span>
+                                <span class="category">Аэрогрили</span>
+                                <i class="far fa-heart favorite-icon"></i>
+                            </div>
+                            <img src="images/airfryer.jpg" alt="Аэрогриль">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Аэрогриль "AirAH"</h3>
+                            <div class="price-container">
+                                <span class="old-price">9 590 р.</span>
+                                <span class="price">7 990 р.</span>
+                            </div>
+                        </div>
+                    </a>
+                    <label for="prod9-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul>
+                            <li>Мощность: 1400 Вт</li>
+                            <li>Объем: 4.5 л</li>
+                            <li>Управление: Сенсор</li>
+                        </ul>
+                        <a href="product-airfryer.html" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod10-toggle" class="product-toggle">
+                    <a href="product-handblender.html" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay">
+                                <span class="article">Арт: 515323</span>
+                                <span class="category">Блендеры</span>
+                                <i class="far fa-heart favorite-icon"></i>
+                            </div>
+                            <img src="images/handblender.jpg" alt="Погружной блендер">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Погружной блендер "ToughPress"</h3>
+                            <div class="price-container">
+                                <span class="price">3 990 р.</span>
+                            </div>
+                        </div>
+                    </a>
+                    <label for="prod10-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul>
+                            <li>Мощность: 1200 Вт</li>
+                            <li>Комплект: 3 в 1</li>
+                            <li>Материал: Металл</li>
+                        </ul>
+                        <a href="product-handblender.html" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod11-toggle" class="product-toggle">
+                    <a href="#" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 000000</span><span class="category">Категория</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/placeholder.png" alt="Товар">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Название Товара 11</h3>
+                            <div class="price-container"><span class="price">000 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod11-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Характеристика 1</li><li>Характеристика 2</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod12-toggle" class="product-toggle">
+                    <a href="#" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 000000</span><span class="category">Категория</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/placeholder.png" alt="Товар">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Название Товара 12</h3>
+                            <div class="price-container"><span class="price">000 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod12-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Характеристика 1</li><li>Характеристика 2</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod13-toggle" class="product-toggle">
+                    <a href="#" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 000000</span><span class="category">Категория</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/placeholder.png" alt="Товар">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Название Товара 13</h3>
+                            <div class="price-container"><span class="price">000 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod13-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Характеристика 1</li><li>Характеристика 2</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod14-toggle" class="product-toggle">
+                    <a href="#" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 000000</span><span class="category">Категория</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/placeholder.png" alt="Товар">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Название Товара 14</h3>
+                            <div class="price-container"><span class="price">000 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod14-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Характеристика 1</li><li>Характеристика 2</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod15-toggle" class="product-toggle">
+                    <a href="#" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 000000</span><span class="category">Категория</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/placeholder.png" alt="Товар">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Название Товара 15</h3>
+                            <div class="price-container"><span class="price">000 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod15-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Характеристика 1</li><li>Характеристика 2</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod16-toggle" class="product-toggle">
+                    <a href="#" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 000000</span><span class="category">Категория</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/placeholder.png" alt="Товар">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Название Товара 16</h3>
+                            <div class="price-container"><span class="price">000 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod16-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Характеристика 1</li><li>Характеристика 2</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod17-toggle" class="product-toggle">
+                    <a href="#" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 000000</span><span class="category">Категория</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/placeholder.png" alt="Товар">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Название Товара 17</h3>
+                            <div class="price-container"><span class="price">000 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod17-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Характеристика 1</li><li>Характеристика 2</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod18-toggle" class="product-toggle">
+                    <a href="#" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 000000</span><span class="category">Категория</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/placeholder.png" alt="Товар">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Название Товара 18</h3>
+                            <div class="price-container"><span class="price">000 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod18-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Характеристика 1</li><li>Характеристика 2</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod19-toggle" class="product-toggle">
+                    <a href="#" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 000000</span><span class="category">Категория</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/placeholder.png" alt="Товар">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Название Товара 19</h3>
+                            <div class="price-container"><span class="price">000 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod19-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Характеристика 1</li><li>Характеристика 2</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <input type="checkbox" id="prod20-toggle" class="product-toggle">
+                    <a href="#" class="product-clickable-area">
+                        <div class="image-container">
+                            <div class="image-overlay"><span class="article">Арт: 000000</span><span class="category">Категория</span><i class="far fa-heart favorite-icon"></i></div>
+                            <img src="images/placeholder.png" alt="Товар">
+                        </div>
+                        <div class="product-info-bottom">
+                            <h3>Название Товара 20</h3>
+                            <div class="price-container"><span class="price">000 р.</span></div>
+                        </div>
+                    </a>
+                    <label for="prod20-toggle" class="details-link" style="text-align:center; cursor: pointer; border-top: 1px solid #eee; padding: 10px; display: block; background: #fdfdfd;">Характеристики</label>
+                    <div class="product-hidden-details">
+                        <ul><li>Характеристика 1</li><li>Характеристика 2</li></ul>
+                        <a href="#" class="details-link">Перейти к товару</a>
+                    </div>
+                </div>
+
+            </div> </div> <nav class="pagination">
+            <a href="#" class="arrow">&laquo;</a>
+            <a href="#" class="active">1</a>
+            <a href="#">2</a>
+            <a href="#">3</a>
+            <span>...</span>
+            <a href="#">9</a>
+            <a href="#" class="arrow">&raquo;</a>
+        </nav>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <div class="footer-logo-section">
+                    <img src="images/logo.png" alt="Лого">
+                </div>
+                <p>Интернет-магазин лучшей кухонной техники. Готовьте с удовольствием!</p>
+            </div>
+            <div class="footer-column">
+                <h3>Разделы сайта</h3>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="catalog.html">Каталог товаров</a></li>
+                    <li><a href="#">Гарантия и возврат</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Каталог</h3>
+                <ul>
+                    <li><a href="#">Блендеры</a></li>
+                    <li><a href="#">Чайники</a></li>
+                    <li><a href="#">Тостеры</a></li>
+                </ul>
+            </div>
+            <div class="footer-column footer-contacts">
+                <h3>Контакты</h3>
+                <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Техническая, д. 1</p>
+                <p><i class="fas fa-phone-alt"></i> +7 (495) 123-45-67</p>
+                <p><i class="fas fa-envelope"></i> info@kitchenshop.ru</p>
+                <p><i class="fas fa-clock"></i> Ежедневно 10:00-21:00</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Copyright © 2025. ООО «КухняТех». Все права защищены</p>
+            <p><a href="#">Политика обработки персональных данных</a></p>
+        </div>
+    </footer>
+
+<script src="script.js"></script> </body>
+</html>

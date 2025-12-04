@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина - Магазин Кухонной Техники</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-top-row">
+            <a href="index.html" class="logo">
+    <div class="logo-icon"><i class="fas fa-blender"></i></div>
+    <div class="logo-text">KITCHEN<span>POT</span></div>
+</a>
+            <form class="search-bar">
+                <input type="text" placeholder="Введите артикул или название товара...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+            <div class="header-icons">
+                <a href="favorites.html" aria-label="Избранное"><i class="far fa-heart"></i></a>
+                
+                <a href="login.html" id="profile-link" aria-label="Профиль"><i class="far fa-user"></i></a>
+                
+                <a href="cart.html" aria-label="Корзина"><i class="fas fa-shopping-cart"></i></a>
+            </div>
+        </div>
+        <div class="header-bottom-row">
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="catalog.html">Товары</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                    <li><a href="cart.html" class="active-link">Корзина</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <nav class="breadcrumbs">
+            <a href="index.html">Главная</a> / <span>Корзина</span>
+        </nav>
+
+        <h1>Ваша корзина</h1>
+
+        <div class="cart-container">
+            <div class="cart-items" id="cart-items-container">
+                <p>Ваша корзина пуста.</p>
+            </div>
+
+            <div class="cart-summary">
+                <h3>Итого</h3>
+                <div class="summary-row">
+                    <span>Товары:</span>
+                    <span id="cart-count">0 шт.</span>
+                </div>
+                <div class="summary-row total">
+                    <span>К оплате:</span>
+                    <span id="cart-total-price">0 руб.</span>
+                </div>
+                <button class="buy-button" id="checkout-btn">Оформить заказ</button>
+                <button class="reset-filters" id="clear-cart-btn" style="margin-top: 10px;">Очистить корзину</button>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="purchase-modal">
+        <div class="modal">
+            <a href="#" class="modal-close" id="modal-close-btn">&times;</a>
+            <div class="form-container">
+                <form id="purchase-form">
+                    <h1>Оформление заказа</h1>
+                    <div class="form-group">
+                        <label for="purchase-name">Ваше имя</label>
+                        <input type="text" id="purchase-name" placeholder="Иван Иванов">
+                        <span class="error-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="purchase-phone">Телефон</label>
+                        <input type="text" id="purchase-phone" placeholder="+7 (999) 123-45-67">
+                        <span class="error-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="purchase-address">Адрес доставки</label>
+                        <input type="text" id="purchase-address" placeholder="г. Москва...">
+                        <span class="error-message"></span>
+                    </div>
+                    <button type="submit" class="form-button">Подтвердить заказ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-bottom"><p>Copyright © 2025</p></div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
