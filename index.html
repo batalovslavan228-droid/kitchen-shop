@@ -6,66 +6,114 @@
     <title>Главная - Магазин Кухонной Техники</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Стили для сообщений */
+        .global-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            color: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+        }
+
+        .global-message.success {
+            background: #4CAF50;
+        }
+
+        .global-message.error {
+            background: #f44336;
+        }
+
+        .global-message.info {
+            background: #2196F3;
+        }
+
+        .message-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Стили для кнопок при загрузке */
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Меню пользователя */
+        .user-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 200px;
+            z-index: 1000;
+        }
+
+        .user-menu p {
+            margin: 0 0 10px 0;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .user-menu button {
+            width: 100%;
+            padding: 8px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .user-menu button:hover {
+            background: #ff5252;
+        }
+
+        /* Индикатор загрузки */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<script>
-// Общий скрипт для работы с API
-document.addEventListener('DOMContentLoaded', function() {
-    // Проверяем, авторизован ли пользователь
-    const currentUser = localStorage.getItem('currentUser');
-    const profileLink = document.getElementById('profile-link');
-    
-    if (currentUser && profileLink) {
-        const user = JSON.parse(currentUser);
-        // Меняем иконку профиля на залогиненную
-        profileLink.innerHTML = '<i class="fas fa-user"></i>';
-        // Добавляем меню пользователя
-        profileLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            showUserMenu(user);
-        });
-    }
-});
-
-// Функция для показа меню пользователя
-function showUserMenu(user) {
-    const menu = `
-        <div class="user-menu">
-            <p>Привет, ${user.username}!</p>
-            <button onclick="logout()">Выйти</button>
-        </div>
-    `;
-    
-    // Показываем меню (нужно добавить стили в CSS)
-    alert(`Вы вошли как ${user.username}`);
-}
-
-// Выход
-function logout() {
-    localStorage.removeItem('currentUser');
-    window.location.reload();
-}
-
-// Проверка работы API
-async function checkServer() {
-    try {
-        const response = await fetch('/api/health');
-        const data = await response.json();
-        console.log('Сервер работает:', data);
-    } catch (error) {
-        console.error('Ошибка подключения к серверу:', error);
-    }
-}
-
-// Проверяем при загрузке
-checkServer();
-</script>
 <body>
 
     <header class="site-header">
         <div class="header-top-row">
             <a href="index.html" class="logo">
-    <div class="logo-icon"><i class="fas fa-blender"></i></div>
-    <div class="logo-text">KITCHEN<span>POT</span></div>
+                <div class="logo-icon"><i class="fas fa-blender"></i></div>
+                <div class="logo-text">KITCHEN<span>POT</span></div>
             </a>
             <form class="search-bar">
                 <input type="text" placeholder="Введите артикул или название товара...">
@@ -74,7 +122,9 @@ checkServer();
             <div class="header-icons">
                 <a href="favorites.html" aria-label="Избранное"><i class="far fa-heart"></i></a>
                 
-                <a href="login.html" id="profile-link" aria-label="Профиль"><i class="far fa-user"></i></a>
+                <a href="login.html" id="profile-link" aria-label="Профиль">
+                    <i class="far fa-user"></i>
+                </a>
                 
                 <a href="cart.html" aria-label="Корзина"><i class="fas fa-shopping-cart"></i></a>
             </div>
@@ -86,6 +136,7 @@ checkServer();
                     <li><a href="catalog.html">Товары</a></li>
                     <li><a href="contacts.html">Контакты</a></li>
                     <li><a href="cart.html">Корзина</a></li>
+                    <li><a href="login.html">Вход</a></li>
                 </ul>
             </nav>
         </div>
@@ -95,6 +146,22 @@ checkServer();
         <section class="hero-banner">
             <div class="hero-content">
                 <h1>Продажа кухонной техники<br>с доставкой на дом!</h1>
+            </div>
+        </section>
+
+        <section class="auth-section" style="padding: 40px 0; background: #f9f9f9;">
+            <div class="auth-container" style="max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <h2 style="text-align: center; margin-bottom: 20px;">Быстрый вход</h2>
+                <form id="quickLoginForm">
+                    <input type="email" placeholder="Email" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
+                    <input type="password" placeholder="Пароль" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
+                    <button type="submit" style="width: 100%; padding: 12px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+                        Войти
+                    </button>
+                    <p style="text-align: center; margin-top: 15px;">
+                        Нет аккаунта? <a href="register.html" style="color: #4CAF50;">Зарегистрироваться</a>
+                    </p>
+                </form>
             </div>
         </section>
 
@@ -114,7 +181,8 @@ checkServer();
         </section>
 
         <section class="absolute-gallery">
-            <h2>Хиты продаж</h2> <img src="images/blender.jpg" alt="Блендер" class="img-1">
+            <h2>Хиты продаж</h2>
+            <img src="images/blender.jpg" alt="Блендер" class="img-1">
             <img src="images/mixer.jpg" alt="Миксер" class="img-2">
             <img src="images/toaster.jpg" alt="Тостер" class="img-3">
             <img src="images/kettle.jpg" alt="Чайник" class="img-4">
@@ -126,11 +194,11 @@ checkServer();
         <div class="footer-content">
             <div class="footer-column">
                 <div class="footer-logo-section">
-    <a href="index.html" class="logo">
-        <div class="logo-icon"><i class="fas fa-blender"></i></div>
-        <div class="logo-text">KITCHEN<span>POT</span></div>
-    </a>
-</div>
+                    <a href="index.html" class="logo">
+                        <div class="logo-icon"><i class="fas fa-blender"></i></div>
+                        <div class="logo-text">KITCHEN<span>POT</span></div>
+                    </a>
+                </div>
                 <p>Интернет-магазин лучшей кухонной техники. Готовьте с удовольствием!</p>
             </div>
             <div class="footer-column">
@@ -164,5 +232,263 @@ checkServer();
         </div>
     </footer>
 
-<script src="script.js"></script> </body>
+    <script>
+        // Глобальный скрипт для обработки форм
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверка авторизации
+            checkAuthStatus();
+            
+            // Обработка ВСЕХ форм на сайте
+            setupForms();
+            
+            // Проверка сервера
+            checkServer();
+        });
+
+        // Проверка авторизации
+        function checkAuthStatus() {
+            const user = localStorage.getItem('currentUser');
+            const profileLink = document.getElementById('profile-link');
+            
+            if (user && profileLink) {
+                const userData = JSON.parse(user);
+                profileLink.innerHTML = `<i class="fas fa-user-check"></i> ${userData.username}`;
+                profileLink.href = "#";
+                profileLink.onclick = function(e) {
+                    e.preventDefault();
+                    showUserMenu(userData);
+                };
+            }
+        }
+
+        // Показать меню пользователя
+        function showUserMenu(user) {
+            // Удаляем старое меню
+            const oldMenu = document.querySelector('.user-menu');
+            if (oldMenu) oldMenu.remove();
+            
+            // Создаем меню
+            const menu = document.createElement('div');
+            menu.className = 'user-menu';
+            menu.innerHTML = `
+                <p>Привет, ${user.username}!</p>
+                <p>Email: ${user.email}</p>
+                <button onclick="logout()">Выйти</button>
+            `;
+            
+            // Добавляем меню
+            const profileLink = document.getElementById('profile-link');
+            profileLink.appendChild(menu);
+            
+            // Закрытие при клике вне меню
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu(e) {
+                    if (!profileLink.contains(e.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', closeMenu);
+                    }
+                });
+            }, 0);
+        }
+
+        // Выход
+        function logout() {
+            localStorage.removeItem('currentUser');
+            location.reload();
+        }
+
+        // Настройка обработки форм
+        function setupForms() {
+            // Обработка быстрой формы входа
+            const quickLoginForm = document.getElementById('quickLoginForm');
+            if (quickLoginForm) {
+                quickLoginForm.addEventListener('submit', handleLogin);
+            }
+            
+            // Обработка формы регистрации на странице регистрации
+            const registerForm = document.querySelector('form[action*="register"], form:has(input[name="username"])');
+            if (registerForm && !registerForm.dataset.handled) {
+                registerForm.dataset.handled = "true";
+                registerForm.addEventListener('submit', handleRegister);
+            }
+            
+            // Обработка формы входа на странице входа
+            const loginForm = document.querySelector('form[action*="login"]:not(#quickLoginForm)');
+            if (loginForm && !loginForm.dataset.handled) {
+                loginForm.dataset.handled = "true";
+                loginForm.addEventListener('submit', handleLogin);
+            }
+        }
+
+        // Обработка регистрации
+        async function handleRegister(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            const username = form.querySelector('input[name="username"]')?.value;
+            const email = form.querySelector('input[type="email"]')?.value;
+            const password = form.querySelector('input[type="password"]')?.value;
+            const confirmPassword = form.querySelector('input[name*="confirm"]')?.value;
+            
+            // Проверка паролей
+            if (confirmPassword && password !== confirmPassword) {
+                showMessage('❌ Пароли не совпадают!', 'error');
+                return;
+            }
+            
+            // Показываем загрузку
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.innerHTML = '<div class="loading"></div> Регистрация...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('✅ Регистрация успешна! Авторизуйтесь.', 'success');
+                    
+                    // Очищаем форму
+                    form.reset();
+                    
+                    // Если это отдельная страница регистрации - редирект
+                    if (window.location.pathname.includes('register')) {
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 1500);
+                    }
+                } else {
+                    showMessage(`❌ Ошибка: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showMessage('❌ Ошибка соединения с сервером', 'error');
+            } finally {
+                // Восстанавливаем кнопку
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Обработка входа
+        async function handleLogin(e) {
+            e.preventDefault();
+            const form = e.target;
+            
+            const email = form.querySelector('input[type="email"]')?.value;
+            const password = form.querySelector('input[type="password"]')?.value;
+            
+            // Показываем загрузку
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.innerHTML = '<div class="loading"></div> Вход...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('✅ Вход выполнен!', 'success');
+                    
+                    // Сохраняем пользователя
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    
+                    // Редирект на главную
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    showMessage(`❌ Ошибка: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showMessage('❌ Ошибка соединения с сервером', 'error');
+            } finally {
+                // Восстанавливаем кнопку
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Проверка работы API
+        async function checkServer() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                console.log('✅ Сервер работает:', data);
+            } catch (error) {
+                console.error('❌ Ошибка подключения к серверу:', error);
+            }
+        }
+
+        // Показ сообщений
+        function showMessage(text, type = 'info') {
+            // Удаляем старые сообщения
+            const oldMsg = document.querySelector('.global-message');
+            if (oldMsg) oldMsg.remove();
+            
+            // Создаем новое сообщение
+            const message = document.createElement('div');
+            message.className = `global-message ${type}`;
+            message.innerHTML = `
+                <div class="message-content">${text}</div>
+                <button class="message-close">&times;</button>
+            `;
+            
+            // Кнопка закрытия
+            message.querySelector('.message-close').onclick = () => message.remove();
+            
+            // Автоудаление через 5 секунд
+            setTimeout(() => {
+                if (message.parentNode) message.remove();
+            }, 5000);
+            
+            document.body.appendChild(message);
+        }
+
+        // Тест API регистрации (для отладки)
+        window.testRegister = async function() {
+            const testData = {
+                username: 'testuser_' + Date.now(),
+                email: 'test' + Date.now() + '@test.com',
+                password: 'test123'
+            };
+            
+            console.log('Тест регистрации:', testData);
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                console.log('Результат:', result);
+                showMessage(`Тест: ${result.message}`, result.success ? 'success' : 'error');
+            } catch (error) {
+                console.error('Ошибка теста:', error);
+                showMessage('❌ Ошибка теста API', 'error');
+            }
+        };
+    </script>
+
+    <!-- Отладочная кнопка (можно убрать потом) -->
+    <button onclick="testRegister()" style="position: fixed; bottom: 20px; right: 20px; padding: 10px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 9998;">
+        Тест API
+    </button>
+
+</body>
 </html>
