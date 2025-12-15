@@ -6,105 +6,23 @@
     <title>Главная - Магазин Кухонной Техники</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Стили для сообщений */
-        .global-message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            color: white;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            animation: slideIn 0.3s ease;
-        }
-
-        .global-message.success {
-            background: #4CAF50;
-        }
-
-        .global-message.error {
-            background: #f44336;
-        }
-
-        .global-message.info {
-            background: #2196F3;
-        }
-
-        .message-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 0;
-            line-height: 1;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* Меню пользователя */
-        .user-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            min-width: 200px;
-            z-index: 1000;
-        }
-
-        .user-menu p {
-            margin: 0 0 10px 0;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .user-menu button {
-            width: 100%;
-            padding: 8px;
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .user-menu button:hover {
-            background: #ff5252;
-        }
-    </style>
 </head>
 <body>
 
     <header class="site-header">
         <div class="header-top-row">
             <a href="index.html" class="logo">
-                <div class="logo-icon"><i class="fas fa-blender"></i></div>
-                <div class="logo-text">KITCHEN<span>POT</span></div>
+    <div class="logo-icon"><i class="fas fa-blender"></i></div>
+    <div class="logo-text">KITCHEN<span>POT</span></div>
             </a>
             <form class="search-bar">
                 <input type="text" placeholder="Введите артикул или название товара...">
                 <button type="submit"><i class="fas fa-search"></i></button>
             </form>
             <div class="header-icons">
-                <a href="favorites.html" aria-label="Избранное"><i class="far fa-heart"></i></a>
-                
-                <a href="login.html" id="profile-link" aria-label="Профиль">
-                    <i class="far fa-user"></i>
-                </a>
-                
-                <a href="cart.html" aria-label="Корзина"><i class="fas fa-shopping-cart"></i></a>
+                <a href="#" aria-label="Избранное"><i class="far fa-heart"></i></a>
+                <a href="login.html" id="profile-link" aria-label="Профиль"><i class="far fa-user"></i></a>
+                <a href="#" aria-label="Корзина"><i class="fas fa-shopping-cart"></i></a>
             </div>
         </div>
         <div class="header-bottom-row">
@@ -123,10 +41,6 @@
         <section class="hero-banner">
             <div class="hero-content">
                 <h1>Продажа кухонной техники<br>с доставкой на дом!</h1>
-                <div class="hero-buttons">
-                    <a href="catalog.html" class="btn btn-primary">Смотреть товары</a>
-                    <a href="login.html" class="btn btn-secondary">Войти в аккаунт</a>
-                </div>
             </div>
         </section>
 
@@ -146,34 +60,11 @@
         </section>
 
         <section class="absolute-gallery">
-            <h2>Хиты продаж</h2>
-            <div class="gallery-grid">
-                <div class="product-card">
-                    <img src="images/blender.jpg" alt="Блендер">
-                    <h3>Мощный блендер</h3>
-                    <p class="price">4 999 ₽</p>
-                </div>
-                <div class="product-card">
-                    <img src="images/mixer.jpg" alt="Миксер">
-                    <h3>Электрический миксер</h3>
-                    <p class="price">3 499 ₽</p>
-                </div>
-                <div class="product-card">
-                    <img src="images/toaster.jpg" alt="Тостер">
-                    <h3>Тостер 4-в-1</h3>
-                    <p class="price">2 999 ₽</p>
-                </div>
-                <div class="product-card">
-                    <img src="images/kettle.jpg" alt="Чайник">
-                    <h3>Чайник с терморегулятором</h3>
-                    <p class="price">1 899 ₽</p>
-                </div>
-                <div class="product-card">
-                    <img src="images/grill.jpg" alt="Гриль">
-                    <h3>Электрический гриль</h3>
-                    <p class="price">5 499 ₽</p>
-                </div>
-            </div>
+            <h2>Хиты продаж</h2> <img src="images/blender.jpg" alt="Блендер" class="img-1">
+            <img src="images/mixer.jpg" alt="Миксер" class="img-2">
+            <img src="images/toaster.jpg" alt="Тостер" class="img-3">
+            <img src="images/kettle.jpg" alt="Чайник" class="img-4">
+            <img src="images/grill.jpg" alt="Гриль" class="img-5">
         </section>
     </main>
 
@@ -181,11 +72,11 @@
         <div class="footer-content">
             <div class="footer-column">
                 <div class="footer-logo-section">
-                    <a href="index.html" class="logo">
-                        <div class="logo-icon"><i class="fas fa-blender"></i></div>
-                        <div class="logo-text">KITCHEN<span>POT</span></div>
-                    </a>
-                </div>
+    <a href="index.html" class="logo">
+        <div class="logo-icon"><i class="fas fa-blender"></i></div>
+        <div class="logo-text">KITCHEN<span>POT</span></div>
+    </a>
+</div>
                 <p>Интернет-магазин лучшей кухонной техники. Готовьте с удовольствием!</p>
             </div>
             <div class="footer-column">
@@ -219,107 +110,5 @@
         </div>
     </footer>
 
-    <script>
-        // Глобальный скрипт для управления авторизацией
-        document.addEventListener('DOMContentLoaded', function() {
-            // Проверка авторизации
-            checkAuthStatus();
-            
-            // Проверка сервера
-            checkServer();
-        });
-
-        // Проверка авторизации
-        function checkAuthStatus() {
-            const user = localStorage.getItem('currentUser');
-            const profileLink = document.getElementById('profile-link');
-            
-            if (user && profileLink) {
-                const userData = JSON.parse(user);
-                profileLink.innerHTML = `<i class="fas fa-user-check"></i> ${userData.username}`;
-                profileLink.href = "#";
-                profileLink.onclick = function(e) {
-                    e.preventDefault();
-                    showUserMenu(userData);
-                };
-            }
-        }
-
-        // Показать меню пользователя
-        function showUserMenu(user) {
-            // Удаляем старое меню
-            const oldMenu = document.querySelector('.user-menu');
-            if (oldMenu) oldMenu.remove();
-            
-            // Создаем меню
-            const menu = document.createElement('div');
-            menu.className = 'user-menu';
-            menu.innerHTML = `
-                <p>Привет, ${user.username}!</p>
-                <p>Email: ${user.email}</p>
-                <button onclick="logout()">Выйти</button>
-            `;
-            
-            // Добавляем меню
-            const profileLink = document.getElementById('profile-link');
-            profileLink.appendChild(menu);
-            
-            // Закрытие при клике вне меню
-            setTimeout(() => {
-                document.addEventListener('click', function closeMenu(e) {
-                    if (!profileLink.contains(e.target)) {
-                        menu.remove();
-                        document.removeEventListener('click', closeMenu);
-                    }
-                });
-            }, 0);
-        }
-
-        // Выход из системы
-        function logout() {
-            localStorage.removeItem('currentUser');
-            showMessage('✅ Вы успешно вышли из системы', 'success');
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        }
-
-        // Проверка работы API
-        async function checkServer() {
-            try {
-                const response = await fetch('/api/health');
-                const data = await response.json();
-                console.log('✅ Сервер работает:', data);
-            } catch (error) {
-                console.error('❌ Ошибка подключения к серверу:', error);
-            }
-        }
-
-        // Показ сообщений
-        function showMessage(text, type = 'info') {
-            // Удаляем старые сообщения
-            const oldMsg = document.querySelector('.global-message');
-            if (oldMsg) oldMsg.remove();
-            
-            // Создаем новое сообщение
-            const message = document.createElement('div');
-            message.className = `global-message ${type}`;
-            message.innerHTML = `
-                <div class="message-content">${text}</div>
-                <button class="message-close">&times;</button>
-            `;
-            
-            // Кнопка закрытия
-            message.querySelector('.message-close').onclick = () => message.remove();
-            
-            // Автоудаление через 5 секунд
-            setTimeout(() => {
-                if (message.parentNode) message.remove();
-            }, 5000);
-            
-            document.body.appendChild(message);
-        }
-    </script>
-
-</body>
+<script src="script.js"></script> </body>
 </html>

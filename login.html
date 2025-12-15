@@ -6,6 +6,56 @@
     <title>Вход - Магазин Кухонной Техники</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Стили для личного кабинета */
+        .account-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .account-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .account-info {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .account-info p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        .logout-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .logout-btn:hover {
+            background: #ff5252;
+        }
+        
+        .back-to-login {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
 
@@ -21,7 +71,11 @@
             </form>
             <div class="header-icons">
                 <a href="favorites.html" aria-label="Избранное"><i class="far fa-heart"></i></a>
-                <a href="login.html" id="profile-link" aria-label="Профиль"><i class="far fa-user"></i></a>
+                
+                <a href="login.html" id="profile-link" aria-label="Профиль">
+                    <i class="far fa-user"></i>
+                </a>
+                
                 <a href="cart.html" aria-label="Корзина"><i class="fas fa-shopping-cart"></i></a>
             </div>
         </div>
@@ -38,7 +92,7 @@
     </header>
 
     <main>
-        <div class="form-container">
+        <div id="login-section" class="form-container">
             <form id="login-form">
                 <h1>Вход в аккаунт</h1>
                 
@@ -62,6 +116,29 @@
                 </div>
             </form>
         </div>
+        
+        <!-- Личный кабинет (изначально скрыт) -->
+        <div id="account-section" class="account-container" style="display: none;">
+            <div class="account-header">
+                <h1>Личный кабинет</h1>
+                <p>Добро пожаловать в ваш профиль!</p>
+            </div>
+            
+            <div class="account-info">
+                <p><strong>Имя пользователя:</strong> <span id="account-username"></span></p>
+                <p><strong>Email:</strong> <span id="account-email"></span></p>
+                <p><strong>ID пользователя:</strong> <span id="account-id"></span></p>
+                <p><strong>Дата регистрации:</strong> <span id="account-date"></span></p>
+            </div>
+            
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Выйти из аккаунта
+            </button>
+            
+            <div class="back-to-login">
+                <a href="index.html">Вернуться на главную</a>
+            </div>
+        </div>
     </main>
 
     <footer class="site-footer">
@@ -69,6 +146,23 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Проверяем, авторизован ли пользователь
+        const user = localStorage.getItem('currentUser');
+        
+        if (user) {
+            // Пользователь уже вошел - показываем личный кабинет
+            showAccount(JSON.parse(user));
+        } else {
+            // Пользователь не авторизован - показываем форму входа
+            setupLoginForm();
+        }
+        
+        // Обновляем иконку профиля в хедере
+        updateProfileIcon();
+    });
+    
+    // Настройка формы входа
+    function setupLoginForm() {
         const loginForm = document.getElementById('login-form');
         const loginError = document.getElementById('login-error');
         
@@ -126,13 +220,14 @@
                     console.log('Ответ сервера:', data);
                     
                     if (data.success) {
-                        alert('✅ ' + data.message);
-                        // Сохраняем информацию о пользователе в localStorage
-                        localStorage.setItem('user', JSON.stringify(data.user));
-                        localStorage.setItem('isLoggedIn', 'true');
+                        // Сохраняем информацию о пользователе
+                        localStorage.setItem('currentUser', JSON.stringify(data.user));
                         
-                        // Перенаправляем на главную страницу
-                        window.location.href = 'index.html';
+                        // Показываем личный кабинет
+                        showAccount(data.user);
+                        
+                        // Обновляем иконку профиля
+                        updateProfileIcon();
                     } else {
                         loginError.textContent = '❌ ' + (data.message || 'Неверный email или пароль');
                         loginError.style.display = 'block';
@@ -148,12 +243,75 @@
                 }
             });
         }
+    }
+    
+    // Показать личный кабинет
+    function showAccount(user) {
+        // Скрываем форму входа
+        const loginSection = document.getElementById('login-section');
+        const accountSection = document.getElementById('account-section');
         
-        // Проверка, если пользователь уже вошел
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            console.log('Пользователь уже авторизован');
+        if (loginSection) loginSection.style.display = 'none';
+        if (accountSection) {
+            accountSection.style.display = 'block';
+            
+            // Заполняем данные пользователя
+            document.getElementById('account-username').textContent = user.username || 'Не указано';
+            document.getElementById('account-email').textContent = user.email || 'Не указано';
+            document.getElementById('account-id').textContent = user.id || 'Не указано';
+            
+            // Добавляем дату регистрации (если есть)
+            if (user.created_at) {
+                const date = new Date(user.created_at);
+                document.getElementById('account-date').textContent = 
+                    date.toLocaleDateString('ru-RU');
+            } else {
+                document.getElementById('account-date').textContent = 'Сегодня';
+            }
         }
-    });
+    }
+    
+    // Выход из аккаунта
+    function logout() {
+        if (confirm('Вы уверены, что хотите выйти из аккаунта?')) {
+            localStorage.removeItem('currentUser');
+            
+            // Показываем сообщение
+            alert('✅ Вы успешно вышли из системы');
+            
+            // Возвращаем к форме входа
+            const loginSection = document.getElementById('login-section');
+            const accountSection = document.getElementById('account-section');
+            
+            if (loginSection) {
+                loginSection.style.display = 'block';
+                // Очищаем форму
+                document.getElementById('login-form').reset();
+            }
+            if (accountSection) accountSection.style.display = 'none';
+            
+            // Обновляем иконку профиля
+            updateProfileIcon();
+        }
+    }
+    
+    // Обновить иконку профиля в хедере
+    function updateProfileIcon() {
+        const profileLink = document.getElementById('profile-link');
+        const user = localStorage.getItem('currentUser');
+        
+        if (profileLink) {
+            if (user) {
+                // Пользователь авторизован - меняем иконку
+                profileLink.innerHTML = '<i class="fas fa-user-check"></i>';
+                profileLink.title = 'Личный кабинет';
+            } else {
+                // Пользователь не авторизован - обычная иконка
+                profileLink.innerHTML = '<i class="far fa-user"></i>';
+                profileLink.title = 'Войти';
+            }
+        }
+    }
     </script>
 </body>
 </html>
