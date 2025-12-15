@@ -417,5 +417,6 @@ document.addEventListener('DOMContentLoaded', () => {
             map.controls.remove('trafficControl');
         });
     }
+    
 
 }); // Конец DOMContentLoaded

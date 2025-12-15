@@ -1,137 +1,215 @@
-const express = require('express'); 
-const mysql = require('mysql2'); 
-const cors = require('cors'); 
+const express = require('express');
+const mysql = require('mysql2');
+const cors = require('cors');
 const path = require('path');
-const bodyParser = require('body-parser'); // Добавил, так как было в зависимостях
 
 const app = express();
-// ВАЖНО: Порт должен быть динамическим для Render
 const PORT = process.env.PORT || 3000;
 
-app.use(cors()); 
-app.use(express.json()); 
-app.use(bodyParser.json());
-// Раздаем файлы из ТЕКУЩЕЙ папки (у тебя index.html лежит рядом с server.js)
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
-// --- ОТЛИЧИЕ 1: Подключение ---
-// В примере было жестко прописано localhost. 
-// Тут мы берем данные из Render (Environment Variables)
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '', // Если локально без пароля
-    database: process.env.DB_NAME || 'kitchen_shop',
-    port: process.env.DB_PORT || 3306
+// Подключение к MySQL
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'Qazwsx110$',
+    database: 'kitchen_shop',
+    port: 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-// Пинг базы (чтобы Railway не разрывал соединение)
-setInterval(() => {
-    connection.query('SELECT 1');
-}, 5000);
-
-function initializeDatabase() {
-    connection.connect((err) => {
-        if (err) {
-            console.log('Ошибка подключения к MySQL:', err.message);
-            return;
-        }
-        console.log('Подключение к MySQL серверу успешно!');
-
-        // Мы просто используем уже созданную базу (на Railway она создается автоматически)
-        createTables();
-    });
-}
-
-function createTables() {
-    // Таблица пользователей
-    const createUsersTable = `
-        CREATE TABLE IF NOT EXISTS users (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            username VARCHAR(100) NOT NULL,
-            email VARCHAR(100) UNIQUE NOT NULL,
-            password VARCHAR(255) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `;
-    
-    // Таблица заказов
-    const createOrdersTable = `
-        CREATE TABLE IF NOT EXISTS orders (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id INT NULL,
-            customer_name VARCHAR(100) NOT NULL,
-            customer_phone VARCHAR(20) NOT NULL,
-            customer_note TEXT,
-            product_name VARCHAR(100) NOT NULL,
-            product_price DECIMAL(10,2) NOT NULL,
-            quantity INT NOT NULL DEFAULT 1,
-            total_amount DECIMAL(10,2) NOT NULL,
-            status ENUM('pending', 'confirmed', 'completed') DEFAULT 'pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `;
-
-    connection.query(createUsersTable, (err) => {
-        if (err) console.log('Ошибка таблицы users:', err.message);
-        else console.log('Таблица users проверена');
-    });
-
-    connection.query(createOrdersTable, (err) => {
-        if (err) console.log('Ошибка таблицы orders:', err.message);
-        else console.log('Таблица orders проверена');
-    });
-}
-
-// --- API ---
-
-// Регистрация
-app.post('/register', (req, res) => { 
-    // В примере было name, у тебя в script.js - username
-    const { username, email, password } = req.body; 
-
-    if (!email || !email.includes('@')) { 
-        return res.status(400).json({ success: false, message: 'Некорректный email!' });
+// Проверка подключения
+pool.getConnection((err, connection) => {
+    if (err) {
+        console.error('❌ Ошибка подключения к MySQL:', err.message);
+        return;
     }
+    console.log('✅ Подключение к MySQL успешно!');
+    connection.release();
+});
 
-    const checkUser = "SELECT * FROM users WHERE email = ?";
-    connection.query(checkUser, [email], (err, results) => {
-        if (err) return res.status(500).json({ success: false, message: 'Ошибка сервера' });
+// Маршрут для проверки сервера
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Сервер работает' });
+});
 
-        if (results.length > 0) {
-            return res.status(400).json({ success: false, message: 'Email занят!' });
+// Регистрация пользователя
+app.post('/api/register', (req, res) => {
+    const { username, email, password } = req.body;
+    
+    console.log('Запрос на регистрацию:', { username, email });
+    
+    // Проверка обязательных полей
+    if (!username || !email || !password) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Все поля обязательны для заполнения' 
+        });
+    }
+    
+    // Проверка формата email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Некорректный формат email' 
+        });
+    }
+    
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error('Ошибка получения соединения:', err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Ошибка сервера' 
+            });
         }
-
-        const insertUser = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-        connection.query(insertUser, [username, email, password], (err, results) => {
-            if (err) return res.status(500).json({ success: false, message: 'Ошибка регистрации' });
-
-            res.json({
-                success: true,
-                message: 'Регистрация успешна!',
-                user: { id: results.insertId, name: username }
+        
+        // Проверяем, существует ли email
+        const checkQuery = 'SELECT id FROM users WHERE email = ?';
+        connection.query(checkQuery, [email], (checkErr, checkResults) => {
+            if (checkErr) {
+                connection.release();
+                console.error('Ошибка проверки email:', checkErr);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Ошибка сервера' 
+                });
+            }
+            
+            if (checkResults.length > 0) {
+                connection.release();
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Этот email уже зарегистрирован' 
+                });
+            }
+            
+            // Создаем пользователя
+            const insertQuery = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
+            connection.query(insertQuery, [username, email, password], (insertErr, insertResults) => {
+                connection.release();
+                
+                if (insertErr) {
+                    console.error('Ошибка создания пользователя:', insertErr);
+                    return res.status(500).json({ 
+                        success: false, 
+                        message: 'Ошибка сервера' 
+                    });
+                }
+                
+                console.log('✅ Пользователь создан, ID:', insertResults.insertId);
+                
+                res.json({ 
+                    success: true, 
+                    message: 'Регистрация успешно завершена!',
+                    userId: insertResults.insertId
+                });
             });
         });
     });
 });
 
-// Вход
-app.post('/login', (req, res) => { 
+// Авторизация пользователя
+app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
-
-    const findUser = "SELECT * FROM users WHERE email = ? AND password = ?";
-    connection.query(findUser, [email, password], (err, results) => {
-        if (err) return res.status(500).json({ success: false, message: 'Ошибка сервера' });
-
-        if (results.length === 0) {
-            return res.status(401).json({ success: false, message: 'Неверный email или пароль!' });
+    
+    console.log('Запрос на вход:', { email });
+    
+    if (!email || !password) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Email и пароль обязательны' 
+        });
+    }
+    
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error('Ошибка получения соединения:', err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Ошибка сервера' 
+            });
         }
+        
+        const query = 'SELECT id, username, email FROM users WHERE email = ? AND password = ?';
+        
+        connection.query(query, [email, password], (queryErr, results) => {
+            connection.release();
+            
+            if (queryErr) {
+                console.error('Ошибка запроса:', queryErr);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Ошибка сервера' 
+                });
+            }
+            
+            if (results.length === 0) {
+                return res.status(401).json({ 
+                    success: false, 
+                    message: 'Неверный email или пароль' 
+                });
+            }
+            
+            const user = results[0];
+            console.log('✅ Успешный вход пользователя:', user.email);
+            
+            res.json({ 
+                success: true, 
+                message: 'Авторизация успешна',
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    email: user.email
+                }
+            });
+        });
+    });
+});
 
-        const user = results[0];
-        res.json({
-            success: true,
-            message: 'Вход выполнен успешно!',
-            user: { id: user.id, username: user.username, email: user.email }
+// Получение информации о пользователе
+app.get('/api/user/:id', (req, res) => {
+    const userId = req.params.id;
+    
+    pool.getConnection((err, connection) => {
+        if (err) {
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Ошибка сервера' 
+            });
+        }
+        
+        const query = 'SELECT id, username, email FROM users WHERE id = ?';
+        
+        connection.query(query, [userId], (queryErr, results) => {
+            connection.release();
+            
+            if (queryErr) {
+                console.error('Ошибка запроса:', queryErr);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Ошибка сервера' 
+                });
+            }
+            
+            if (results.length === 0) {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: 'Пользователь не найден' 
+                });
+            }
+            
+            res.json({ 
+                success: true, 
+                user: results[0] 
+            });
         });
     });
 });
@@ -141,9 +219,31 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Запуск
-initializeDatabase();
+// Все остальные GET запросы
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
+// Обработка ошибок 404 для API
+app.use('/api/*', (req, res) => {
+    res.status(404).json({ 
+        success: false, 
+        message: 'API endpoint не найден' 
+    });
+});
+
+// Глобальный обработчик ошибок
+app.use((err, req, res, next) => {
+    console.error('Глобальная ошибка:', err);
+    res.status(500).json({ 
+        success: false, 
+        message: 'Внутренняя ошибка сервера' 
+    });
+});
+
+// Запуск сервера
 app.listen(PORT, () => {
-    console.log(`Сервер запущен на порту ${PORT}`);
+    console.log(`🚀 Сервер запущен на порту ${PORT}`);
+    console.log(`🌐 Доступен по адресу: http://localhost:${PORT}`);
+    console.log(`🔧 Проверка здоровья: http://localhost:${PORT}/api/health`);
 });
