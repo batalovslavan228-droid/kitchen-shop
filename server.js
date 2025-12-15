@@ -8,18 +8,32 @@ const PORT = process.env.PORT || 10000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname)); // Раздаем файлы из корня
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
 
-// Переменная для хранения пользователей (вместо БД)
+// Хранилище пользователей в памяти
 let users = [];
+
+// ================= API МАРШРУТЫ =================
+
+// Проверка работы сервера
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        message: 'Сервер работает',
+        usersCount: users.length,
+        timestamp: new Date().toISOString()
+    });
+});
 
 // Регистрация
 app.post('/api/register', (req, res) => {
     try {
         const { username, email, password } = req.body;
         
-        console.log('📝 Регистрация:', username, email);
+        console.log('📝 Регистрация запроса:', { username, email });
         
+        // Проверка обязательных полей
         if (!username || !email || !password) {
             return res.status(400).json({ 
                 success: false, 
@@ -27,27 +41,39 @@ app.post('/api/register', (req, res) => {
             });
         }
         
-        // Проверяем, есть ли такой email
+        // Проверка email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Некорректный email' 
+            });
+        }
+        
+        // Проверяем, есть ли уже такой email
         const existingUser = users.find(user => user.email === email);
         if (existingUser) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Email уже занят' 
+                message: 'Этот email уже зарегистрирован' 
             });
         }
         
         // Создаем нового пользователя
         const newUser = {
-            id: Date.now(), // ID из времени
+            id: Date.now(), // Простой ID на основе времени
             username,
             email,
             password,
             created_at: new Date().toISOString()
         };
         
+        // Добавляем в массив
         users.push(newUser);
+        
         console.log('✅ Пользователь зарегистрирован:', newUser.id);
         
+        // Успешный ответ
         res.json({ 
             success: true, 
             message: 'Регистрация успешна!',
@@ -58,7 +84,7 @@ app.post('/api/register', (req, res) => {
         console.error('❌ Ошибка регистрации:', error);
         res.status(500).json({ 
             success: false, 
-            message: 'Ошибка сервера' 
+            message: 'Внутренняя ошибка сервера' 
         });
     }
 });
@@ -68,7 +94,7 @@ app.post('/api/login', (req, res) => {
     try {
         const { email, password } = req.body;
         
-        console.log('🔐 Вход:', email);
+        console.log('🔐 Попытка входа:', email);
         
         // Ищем пользователя
         const user = users.find(u => u.email === email && u.password === password);
@@ -95,19 +121,9 @@ app.post('/api/login', (req, res) => {
         console.error('❌ Ошибка входа:', error);
         res.status(500).json({ 
             success: false, 
-            message: 'Ошибка сервера' 
+            message: 'Внутренняя ошибка сервера' 
         });
     }
-});
-
-// Проверка здоровья сервера
-app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
-        message: 'Сервер работает',
-        usersCount: users.length,
-        timestamp: new Date().toISOString()
-    });
 });
 
 // Получить всех пользователей (для отладки)
@@ -122,15 +138,31 @@ app.get('/api/users', (req, res) => {
     });
 });
 
+// ================= СТАТИЧЕСКИЕ ФАЙЛЫ =================
+
 // Главная страница
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Запуск сервера
+// Для всех остальных маршрутов - 404 для API, index.html для остального
+app.get('*', (req, res) => {
+    if (req.path.startsWith('/api/')) {
+        res.status(404).json({ 
+            success: false, 
+            message: 'API endpoint не найден' 
+        });
+    } else {
+        res.sendFile(path.join(__dirname, 'index.html'));
+    }
+});
+
+// ================= ЗАПУСК СЕРВЕРА =================
+
 app.listen(PORT, () => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
-    console.log(`🌐 Ссылка: http://localhost:${PORT}`);
-    console.log(`🔧 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`👥 Users API: http://localhost:${PORT}/api/users`);
+    console.log(`🌐 Доступен по адресу: http://localhost:${PORT}`);
+    console.log(`🔧 Проверка здоровья: http://localhost:${PORT}/api/health`);
+    console.log(`📝 Регистрация API: http://localhost:${PORT}/api/register`);
+    console.log(`🔐 Вход API: http://localhost:${PORT}/api/login`);
 });

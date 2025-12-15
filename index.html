@@ -7,6 +7,58 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+<script>
+// Общий скрипт для работы с API
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем, авторизован ли пользователь
+    const currentUser = localStorage.getItem('currentUser');
+    const profileLink = document.getElementById('profile-link');
+    
+    if (currentUser && profileLink) {
+        const user = JSON.parse(currentUser);
+        // Меняем иконку профиля на залогиненную
+        profileLink.innerHTML = '<i class="fas fa-user"></i>';
+        // Добавляем меню пользователя
+        profileLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showUserMenu(user);
+        });
+    }
+});
+
+// Функция для показа меню пользователя
+function showUserMenu(user) {
+    const menu = `
+        <div class="user-menu">
+            <p>Привет, ${user.username}!</p>
+            <button onclick="logout()">Выйти</button>
+        </div>
+    `;
+    
+    // Показываем меню (нужно добавить стили в CSS)
+    alert(`Вы вошли как ${user.username}`);
+}
+
+// Выход
+function logout() {
+    localStorage.removeItem('currentUser');
+    window.location.reload();
+}
+
+// Проверка работы API
+async function checkServer() {
+    try {
+        const response = await fetch('/api/health');
+        const data = await response.json();
+        console.log('Сервер работает:', data);
+    } catch (error) {
+        console.error('Ошибка подключения к серверу:', error);
+    }
+}
+
+// Проверяем при загрузке
+checkServer();
+</script>
 <body>
 
     <header class="site-header">
