@@ -50,12 +50,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        /* Стили для кнопок при загрузке */
-        button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
         /* Меню пользователя */
         .user-menu {
             position: absolute;
@@ -89,22 +83,6 @@
         .user-menu button:hover {
             background: #ff5252;
         }
-
-        /* Индикатор загрузки */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
@@ -136,7 +114,6 @@
                     <li><a href="catalog.html">Товары</a></li>
                     <li><a href="contacts.html">Контакты</a></li>
                     <li><a href="cart.html">Корзина</a></li>
-                    <li><a href="login.html">Вход</a></li>
                 </ul>
             </nav>
         </div>
@@ -146,22 +123,10 @@
         <section class="hero-banner">
             <div class="hero-content">
                 <h1>Продажа кухонной техники<br>с доставкой на дом!</h1>
-            </div>
-        </section>
-
-        <section class="auth-section" style="padding: 40px 0; background: #f9f9f9;">
-            <div class="auth-container" style="max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <h2 style="text-align: center; margin-bottom: 20px;">Быстрый вход</h2>
-                <form id="quickLoginForm">
-                    <input type="email" placeholder="Email" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
-                    <input type="password" placeholder="Пароль" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
-                    <button type="submit" style="width: 100%; padding: 12px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
-                        Войти
-                    </button>
-                    <p style="text-align: center; margin-top: 15px;">
-                        Нет аккаунта? <a href="register.html" style="color: #4CAF50;">Зарегистрироваться</a>
-                    </p>
-                </form>
+                <div class="hero-buttons">
+                    <a href="catalog.html" class="btn btn-primary">Смотреть товары</a>
+                    <a href="login.html" class="btn btn-secondary">Войти в аккаунт</a>
+                </div>
             </div>
         </section>
 
@@ -182,11 +147,33 @@
 
         <section class="absolute-gallery">
             <h2>Хиты продаж</h2>
-            <img src="images/blender.jpg" alt="Блендер" class="img-1">
-            <img src="images/mixer.jpg" alt="Миксер" class="img-2">
-            <img src="images/toaster.jpg" alt="Тостер" class="img-3">
-            <img src="images/kettle.jpg" alt="Чайник" class="img-4">
-            <img src="images/grill.jpg" alt="Гриль" class="img-5">
+            <div class="gallery-grid">
+                <div class="product-card">
+                    <img src="images/blender.jpg" alt="Блендер">
+                    <h3>Мощный блендер</h3>
+                    <p class="price">4 999 ₽</p>
+                </div>
+                <div class="product-card">
+                    <img src="images/mixer.jpg" alt="Миксер">
+                    <h3>Электрический миксер</h3>
+                    <p class="price">3 499 ₽</p>
+                </div>
+                <div class="product-card">
+                    <img src="images/toaster.jpg" alt="Тостер">
+                    <h3>Тостер 4-в-1</h3>
+                    <p class="price">2 999 ₽</p>
+                </div>
+                <div class="product-card">
+                    <img src="images/kettle.jpg" alt="Чайник">
+                    <h3>Чайник с терморегулятором</h3>
+                    <p class="price">1 899 ₽</p>
+                </div>
+                <div class="product-card">
+                    <img src="images/grill.jpg" alt="Гриль">
+                    <h3>Электрический гриль</h3>
+                    <p class="price">5 499 ₽</p>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -233,13 +220,10 @@
     </footer>
 
     <script>
-        // Глобальный скрипт для обработки форм
+        // Глобальный скрипт для управления авторизацией
         document.addEventListener('DOMContentLoaded', function() {
             // Проверка авторизации
             checkAuthStatus();
-            
-            // Обработка ВСЕХ форм на сайте
-            setupForms();
             
             // Проверка сервера
             checkServer();
@@ -291,135 +275,13 @@
             }, 0);
         }
 
-        // Выход
+        // Выход из системы
         function logout() {
             localStorage.removeItem('currentUser');
-            location.reload();
-        }
-
-        // Настройка обработки форм
-        function setupForms() {
-            // Обработка быстрой формы входа
-            const quickLoginForm = document.getElementById('quickLoginForm');
-            if (quickLoginForm) {
-                quickLoginForm.addEventListener('submit', handleLogin);
-            }
-            
-            // Обработка формы регистрации на странице регистрации
-            const registerForm = document.querySelector('form[action*="register"], form:has(input[name="username"])');
-            if (registerForm && !registerForm.dataset.handled) {
-                registerForm.dataset.handled = "true";
-                registerForm.addEventListener('submit', handleRegister);
-            }
-            
-            // Обработка формы входа на странице входа
-            const loginForm = document.querySelector('form[action*="login"]:not(#quickLoginForm)');
-            if (loginForm && !loginForm.dataset.handled) {
-                loginForm.dataset.handled = "true";
-                loginForm.addEventListener('submit', handleLogin);
-            }
-        }
-
-        // Обработка регистрации
-        async function handleRegister(e) {
-            e.preventDefault();
-            const form = e.target;
-            
-            const username = form.querySelector('input[name="username"]')?.value;
-            const email = form.querySelector('input[type="email"]')?.value;
-            const password = form.querySelector('input[type="password"]')?.value;
-            const confirmPassword = form.querySelector('input[name*="confirm"]')?.value;
-            
-            // Проверка паролей
-            if (confirmPassword && password !== confirmPassword) {
-                showMessage('❌ Пароли не совпадают!', 'error');
-                return;
-            }
-            
-            // Показываем загрузку
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.innerHTML = '<div class="loading"></div> Регистрация...';
-            submitBtn.disabled = true;
-            
-            try {
-                const response = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showMessage('✅ Регистрация успешна! Авторизуйтесь.', 'success');
-                    
-                    // Очищаем форму
-                    form.reset();
-                    
-                    // Если это отдельная страница регистрации - редирект
-                    if (window.location.pathname.includes('register')) {
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 1500);
-                    }
-                } else {
-                    showMessage(`❌ Ошибка: ${result.message}`, 'error');
-                }
-            } catch (error) {
-                console.error('Ошибка:', error);
-                showMessage('❌ Ошибка соединения с сервером', 'error');
-            } finally {
-                // Восстанавливаем кнопку
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-        }
-
-        // Обработка входа
-        async function handleLogin(e) {
-            e.preventDefault();
-            const form = e.target;
-            
-            const email = form.querySelector('input[type="email"]')?.value;
-            const password = form.querySelector('input[type="password"]')?.value;
-            
-            // Показываем загрузку
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.innerHTML = '<div class="loading"></div> Вход...';
-            submitBtn.disabled = true;
-            
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showMessage('✅ Вход выполнен!', 'success');
-                    
-                    // Сохраняем пользователя
-                    localStorage.setItem('currentUser', JSON.stringify(result.user));
-                    
-                    // Редирект на главную
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                } else {
-                    showMessage(`❌ Ошибка: ${result.message}`, 'error');
-                }
-            } catch (error) {
-                console.error('Ошибка:', error);
-                showMessage('❌ Ошибка соединения с сервером', 'error');
-            } finally {
-                // Восстанавливаем кнопку
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
+            showMessage('✅ Вы успешно вышли из системы', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
         }
 
         // Проверка работы API
@@ -457,38 +319,7 @@
             
             document.body.appendChild(message);
         }
-
-        // Тест API регистрации (для отладки)
-        window.testRegister = async function() {
-            const testData = {
-                username: 'testuser_' + Date.now(),
-                email: 'test' + Date.now() + '@test.com',
-                password: 'test123'
-            };
-            
-            console.log('Тест регистрации:', testData);
-            
-            try {
-                const response = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(testData)
-                });
-                
-                const result = await response.json();
-                console.log('Результат:', result);
-                showMessage(`Тест: ${result.message}`, result.success ? 'success' : 'error');
-            } catch (error) {
-                console.error('Ошибка теста:', error);
-                showMessage('❌ Ошибка теста API', 'error');
-            }
-        };
     </script>
-
-    <!-- Отладочная кнопка (можно убрать потом) -->
-    <button onclick="testRegister()" style="position: fixed; bottom: 20px; right: 20px; padding: 10px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 9998;">
-        Тест API
-    </button>
 
 </body>
 </html>

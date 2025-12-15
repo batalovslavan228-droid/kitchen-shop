@@ -12,18 +12,16 @@
     <header class="site-header">
         <div class="header-top-row">
             <a href="index.html" class="logo">
-    <div class="logo-icon"><i class="fas fa-blender"></i></div>
-    <div class="logo-text">KITCHEN<span>POT</span></div>
-</a>
+                <div class="logo-icon"><i class="fas fa-blender"></i></div>
+                <div class="logo-text">KITCHEN<span>POT</span></div>
+            </a>
             <form class="search-bar">
                 <input type="text" placeholder="Введите артикул или название товара...">
                 <button type="submit"><i class="fas fa-search"></i></button>
             </form>
             <div class="header-icons">
                 <a href="favorites.html" aria-label="Избранное"><i class="far fa-heart"></i></a>
-                
                 <a href="login.html" id="profile-link" aria-label="Профиль"><i class="far fa-user"></i></a>
-                
                 <a href="cart.html" aria-label="Корзина"><i class="fas fa-shopping-cart"></i></a>
             </div>
         </div>
@@ -46,7 +44,7 @@
                 
                 <div class="form-group">
                     <label for="login-email">Email</label>
-                    <input type="text" id="login-email" placeholder="Введите ваш email">
+                    <input type="email" id="login-email" placeholder="Введите ваш email">
                     <span class="error-message"></span>
                 </div>
 
@@ -67,8 +65,95 @@
     </main>
 
     <footer class="site-footer">
-         </footer>
+    </footer>
 
-    <script src="script.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        
+        if (loginForm) {
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault(); // Останавливаем стандартную отправку формы
+                
+                // Получаем значения полей
+                const email = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value;
+                
+                // Очищаем предыдущие ошибки
+                document.querySelectorAll('.error-message').forEach(el => {
+                    el.textContent = '';
+                    el.style.display = 'none';
+                });
+                loginError.style.display = 'none';
+                
+                // Валидация
+                let hasError = false;
+                
+                if (!email || !email.includes('@')) {
+                    document.getElementById('login-email').nextElementSibling.textContent = 'Введите корректный email';
+                    hasError = true;
+                }
+                
+                if (!password) {
+                    document.getElementById('login-password').nextElementSibling.textContent = 'Введите пароль';
+                    hasError = true;
+                }
+                
+                if (hasError) return;
+                
+                // Отправляем на сервер
+                const button = loginForm.querySelector('.form-button');
+                const originalText = button.textContent;
+                button.textContent = 'Вход...';
+                button.disabled = true;
+                
+                try {
+                    console.log('Отправка данных входа:', { email });
+                    
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            password: password
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    console.log('Ответ сервера:', data);
+                    
+                    if (data.success) {
+                        alert('✅ ' + data.message);
+                        // Сохраняем информацию о пользователе в localStorage
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        localStorage.setItem('isLoggedIn', 'true');
+                        
+                        // Перенаправляем на главную страницу
+                        window.location.href = 'index.html';
+                    } else {
+                        loginError.textContent = '❌ ' + (data.message || 'Неверный email или пароль');
+                        loginError.style.display = 'block';
+                    }
+                    
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    loginError.textContent = '❌ Ошибка соединения с сервером';
+                    loginError.style.display = 'block';
+                } finally {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            });
+        }
+        
+        // Проверка, если пользователь уже вошел
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            console.log('Пользователь уже авторизован');
+        }
+    });
+    </script>
 </body>
-</html> 
+</html>
