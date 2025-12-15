@@ -1,4 +1,5 @@
 const express = require('express');
+const { Pool } = require('pg');  // Добавь эту строку!
 const cors = require('cors');
 const path = require('path');
 
@@ -11,23 +12,72 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
-// Хранилище пользователей (в памяти)
-let users = [];
+// ============ ПОДКЛЮЧЕНИЕ К POSTGRESQL ============
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false  // Обязательно для Render!
+    }
+});
+
+// Проверка подключения к БД
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error('❌ Ошибка подключения к PostgreSQL:', err.message);
+    } else {
+        console.log('✅ Подключение к PostgreSQL успешно!');
+        release();
+        
+        // Создаем таблицу если её нет
+        createUsersTable();
+    }
+});
+
+// Создание таблицы
+async function createUsersTable() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(100) NOT NULL,
+                email VARCHAR(100) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('✅ Таблица users готова');
+    } catch (err) {
+        console.error('❌ Ошибка создания таблицы:', err.message);
+    }
+}
 
 // ============ API МАРШРУТЫ ============
 
-// 1. Проверка сервера
-app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
-        message: 'Сервер работает',
-        usersCount: users.length,
-        timestamp: new Date().toISOString()
-    });
+// 1. Проверка сервера и БД
+app.get('/api/health', async (req, res) => {
+    try {
+        // Проверяем подключение к БД
+        await pool.query('SELECT 1');
+        const usersCount = await pool.query('SELECT COUNT(*) FROM users');
+        
+        res.json({ 
+            status: 'ok', 
+            message: 'Сервер и PostgreSQL работают',
+            database: 'PostgreSQL on Render',
+            usersCount: parseInt(usersCount.rows[0].count),
+            timestamp: new Date().toISOString()
+        });
+    } catch (err) {
+        res.status(500).json({ 
+            status: 'error', 
+            message: 'Ошибка подключения к БД',
+            error: err.message 
+        });
+    }
 });
 
-// 2. Регистрация
-app.post('/api/register', (req, res) => {
+// 2. Регистрация (сохраняет в PostgreSQL)
+app.post('/api/register', async (req, res) => {
     console.log('📝 Получен запрос на регистрацию:', req.body);
     
     try {
@@ -49,60 +99,58 @@ app.post('/api/register', (req, res) => {
             });
         }
         
-        // Проверяем есть ли такой email
-        const existingUser = users.find(user => user.email === email);
-        if (existingUser) {
+        // Сохраняем в PostgreSQL
+        const result = await pool.query(
+            'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id',
+            [username, email, password]
+        );
+        
+        console.log('✅ Пользователь сохранен в PostgreSQL, ID:', result.rows[0].id);
+        
+        res.json({ 
+            success: true, 
+            message: 'Регистрация успешна!',
+            userId: result.rows[0].id
+        });
+        
+    } catch (error) {
+        console.error('❌ Ошибка регистрации:', error.message);
+        
+        // Ошибка дубликата email
+        if (error.code === '23505') {
             return res.status(400).json({ 
                 success: false, 
                 message: 'Email уже занят' 
             });
         }
         
-        // Создаем пользователя
-        const newUser = {
-            id: Date.now(),
-            username,
-            email,
-            password,
-            created_at: new Date().toISOString()
-        };
-        
-        users.push(newUser);
-        
-        console.log('✅ Пользователь зарегистрирован:', newUser.id);
-        
-        res.json({ 
-            success: true, 
-            message: 'Регистрация успешна!',
-            userId: newUser.id
-        });
-        
-    } catch (error) {
-        console.error('❌ Ошибка регистрации:', error);
         res.status(500).json({ 
             success: false, 
-            message: 'Ошибка сервера' 
+            message: 'Ошибка сервера: ' + error.message 
         });
     }
 });
 
-// 3. Вход
-app.post('/api/login', (req, res) => {
+// 3. Вход (проверяет в PostgreSQL)
+app.post('/api/login', async (req, res) => {
     console.log('🔐 Попытка входа:', req.body.email);
     
     try {
         const { email, password } = req.body;
         
-        const user = users.find(u => u.email === email && u.password === password);
+        // Ищем в PostgreSQL
+        const result = await pool.query(
+            'SELECT id, username, email FROM users WHERE email = $1 AND password = $2',
+            [email, password]
+        );
         
-        if (user) {
-            // Убираем пароль из ответа
-            const { password: _, ...userWithoutPassword } = user;
+        if (result.rows.length > 0) {
+            console.log('✅ Успешный вход:', email);
             
             res.json({ 
                 success: true, 
                 message: 'Вход выполнен',
-                user: userWithoutPassword
+                user: result.rows[0]
             });
         } else {
             res.status(401).json({ 
@@ -111,7 +159,7 @@ app.post('/api/login', (req, res) => {
             });
         }
     } catch (error) {
-        console.error('❌ Ошибка входа:', error);
+        console.error('❌ Ошибка входа:', error.message);
         res.status(500).json({ 
             success: false, 
             message: 'Ошибка сервера' 
@@ -119,39 +167,37 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// 4. Получить всех пользователей
-app.get('/api/users', (req, res) => {
-    // Не показываем пароли
-    const usersWithoutPasswords = users.map(u => ({
-        id: u.id,
-        username: u.username,
-        email: u.email,
-        created_at: u.created_at
-    }));
-    
-    res.json({ 
-        success: true, 
-        users: usersWithoutPasswords 
-    });
+// 4. Получить всех пользователей из PostgreSQL
+app.get('/api/users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, username, email, created_at FROM users ORDER BY created_at DESC');
+        
+        res.json({ 
+            success: true, 
+            users: result.rows 
+        });
+    } catch (error) {
+        console.error('❌ Ошибка получения пользователей:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Ошибка сервера' 
+        });
+    }
 });
 
 // ============ СТАТИЧЕСКИЕ ФАЙЛЫ ============
 
-// Главная страница
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Для всех остальных маршрутов - 404 для API
 app.all('/api/*', (req, res) => {
     res.status(404).json({ 
         success: false, 
-        message: 'API endpoint не найден',
-        requestedUrl: req.originalUrl
+        message: 'API endpoint не найден' 
     });
 });
 
-// Для остальных - index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -160,7 +206,5 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
-    console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`🔗 Register API: http://localhost:${PORT}/api/register`);
-    console.log(`🔗 Login API: http://localhost:${PORT}/api/login`);
+    console.log(`🔗 PostgreSQL подключен: ${process.env.DATABASE_URL ? 'Да' : 'Нет'}`);
 });
