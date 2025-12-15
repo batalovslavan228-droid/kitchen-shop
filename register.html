@@ -12,9 +12,9 @@
     <header class="site-header">
         <div class="header-top-row">
             <a href="index.html" class="logo">
-    <div class="logo-icon"><i class="fas fa-blender"></i></div>
-    <div class="logo-text">KITCHEN<span>POT</span></div>
-</a>
+                <div class="logo-icon"><i class="fas fa-blender"></i></div>
+                <div class="logo-text">KITCHEN<span>POT</span></div>
+            </a>
             <form class="search-bar">
                 <input type="text" placeholder="Введите артикул или название товара...">
                 <button type="submit"><i class="fas fa-search"></i></button>
@@ -50,7 +50,7 @@
                 
                 <div class="form-group">
                     <label for="reg-email">Email</label>
-                    <input type="text" id="reg-email" placeholder="Введите ваш email">
+                    <input type="email" id="reg-email" placeholder="Введите ваш email">
                     <span class="error-message"></span>
                 </div>
 
@@ -75,8 +75,108 @@
     </main>
 
     <footer class="site-footer">
-        </footer>
+        <!-- Футер здесь -->
+    </footer>
 
     <script src="script.js"></script>
+    <!-- ДОБАВЬТЕ ЭТОТ КОД ПРЯМО ЗДЕСЬ -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const registerForm = document.getElementById('register-form');
+        
+        if (registerForm) {
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault(); // Останавливаем стандартную отправку формы
+                
+                // Получаем значения полей
+                const username = document.getElementById('reg-username').value.trim();
+                const email = document.getElementById('reg-email').value.trim();
+                const password = document.getElementById('reg-password').value;
+                const password2 = document.getElementById('reg-password2').value;
+                
+                // Очищаем предыдущие ошибки
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+                
+                // Валидация
+                let hasError = false;
+                
+                if (!username) {
+                    document.getElementById('reg-username').nextElementSibling.textContent = 'Введите имя пользователя';
+                    hasError = true;
+                }
+                
+                if (!email || !email.includes('@')) {
+                    document.getElementById('reg-email').nextElementSibling.textContent = 'Введите корректный email';
+                    hasError = true;
+                }
+                
+                if (!password) {
+                    document.getElementById('reg-password').nextElementSibling.textContent = 'Введите пароль';
+                    hasError = true;
+                }
+                
+                if (password !== password2) {
+                    document.getElementById('reg-password2').nextElementSibling.textContent = 'Пароли не совпадают';
+                    hasError = true;
+                }
+                
+                if (hasError) return;
+                
+                // Отправляем на сервер
+                const button = registerForm.querySelector('.form-button');
+                const originalText = button.textContent;
+                button.textContent = 'Регистрация...';
+                button.disabled = true;
+                
+                try {
+                    console.log('Отправка данных:', { username, email });
+                    
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            email: email,
+                            password: password
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    console.log('Ответ сервера:', data);
+                    
+                    if (data.success) {
+                        alert('✅ ' + data.message);
+                        // Перенаправляем на страницу входа
+                        window.location.href = 'login.html';
+                    } else {
+                        alert('❌ ' + (data.message || 'Ошибка регистрации'));
+                    }
+                    
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('❌ Ошибка соединения с сервером. Проверьте консоль (F12)');
+                } finally {
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            });
+        }
+        
+        // Проверка подключения к серверу
+        async function checkServerHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                console.log('✅ Сервер работает:', data);
+            } catch (error) {
+                console.warn('⚠️ Сервер не отвечает на /api/health');
+            }
+        }
+        
+        checkServerHealth();
+    });
+    </script>
 </body>
 </html>
