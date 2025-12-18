@@ -1590,3 +1590,106 @@ button:disabled {
     height: 30px;
     line-height: 30px;     /* Центровка текста по вертикали */
 }
+/* ============================================================
+   АДАПТИВНОСТЬ (МОБИЛЬНАЯ ВЕРСИЯ)
+   Вставлять в самый конец style.css
+   ============================================================ */
+
+/* 1. Планшеты и большие телефоны (меньше 768px) */
+@media (max-width: 768px) {
+
+    /* --- ШАПКА --- */
+    /* Выстраиваем элементы шапки в колонку, чтобы не наезжали */
+    .header-top-row {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    /* Логотип по центру */
+    .logo {
+        margin-right: 0;
+        justify-content: center;
+    }
+
+    /* Поиск на всю ширину */
+    .search-bar {
+        width: 100%;
+        margin: 0;
+    }
+
+    .search-bar input {
+        width: 100%; /* Поле ввода тоже на всю ширину */
+    }
+
+    /* Иконки по центру и с отступами */
+    .header-icons {
+        justify-content: center;
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    .header-icons a {
+        margin: 0 15px; /* Увеличиваем расстояние между иконками */
+        font-size: 20px; /* Делаем иконки чуть крупнее для пальца */
+    }
+
+    /* Меню (вторая строка) */
+    .main-nav ul {
+        flex-wrap: wrap; /* Разрешаем перенос ссылок */
+        justify-content: center;
+        gap: 10px;
+    }
+
+    /* --- КАТАЛОГ --- */
+    /* Делаем по 2 товара в ряд вместо 4 */
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 15px;
+    }
+    
+    /* Скрываем фильтры сбоку (они занимают слишком много места на телефоне) */
+    /* В идеале для них нужна кнопка "Показать фильтры", но пока просто скроем или перенесем вниз */
+    .catalog-layout {
+        display: block; /* Убираем flex/grid раскладку страницы */
+    }
+
+    .filters {
+        width: 100%;
+        margin-bottom: 20px;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 20px;
+    }
+    
+    /* Уменьшаем шрифт заголовков товаров */
+    .product-card h3 {
+        font-size: 14px;
+        height: auto; /* Чтобы текст не обрезался */
+    }
+}
+
+/* 2. Маленькие телефоны (меньше 480px) */
+@media (max-width: 480px) {
+    
+    /* Товары по 1 в ряд (один большой товар на экран) */
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Кнопки в корзине на всю ширину */
+    .cart-summary {
+        width: 100%;
+    }
+    
+    /* Убираем лишние отступы у секции хитов */
+    .hits-section {
+        padding: 20px 10px;
+    }
+    
+    /* Сетка хитов в 1 колонку */
+    .hits-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+}
