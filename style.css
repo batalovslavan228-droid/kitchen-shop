@@ -1430,3 +1430,163 @@ button:disabled {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+/* Делаем карточку базой для позиционирования */
+.product-card {
+    position: relative; 
+}
+
+/* Стили для кнопки сердечка в каталоге */
+.add-to-favorites-catalog {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10; /* Чтобы была поверх картинки и ссылки */
+    
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #888;
+    transition: all 0.2s ease;
+}
+
+/* При наведении */
+.add-to-favorites-catalog:hover {
+    background: #fff;
+    color: #E24C55;
+    transform: scale(1.1);
+}
+
+/* Если товар добавлен (скрипт добавит класс .fas) */
+.add-to-favorites-catalog i.fas {
+    color: #E24C55;
+}
+/* =========================================
+   СТИЛИ ДЛЯ КНОПОК (ИЗБРАННОЕ И КОРЗИНА)
+   ========================================= */
+
+/* 1. Кнопка удаления в избранном (Крестик) */
+.remove-from-fav {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #eee;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    
+    cursor: pointer;
+    color: #888;
+    font-size: 16px;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.remove-from-fav:hover {
+    background: #E24C55;
+    color: white;
+    border-color: #E24C55;
+}
+
+/* 2. Блок "Итого" в корзине: Делаем кнопки одинаковыми */
+
+/* Кнопка "Оформить заказ" (Красная) */
+.cart-summary .buy-button {
+    width: 100%;           /* Растягиваем на всю ширину */
+    padding: 12px 0;       /* Высота кнопки */
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 5px;
+    background-color: #E24C55;
+    color: white;
+    border: 1px solid #E24C55;
+    cursor: pointer;
+    transition: background 0.3s;
+    display: block;       
+    margin-bottom: 10px;   /* Отступ до следующей кнопки */
+}
+
+.cart-summary .buy-button:hover {
+    background-color: #c03940;
+}
+
+/* Кнопка "Очистить корзину" (Белая) */
+#clear-cart-btn {
+    width: 100%;           /* Точно такая же ширина */
+    padding: 12px 0;       /* Точно такая же высота */
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 5px;
+    
+    background-color: white;
+    color: #666;
+    border: 1px solid #ccc;
+    
+    cursor: pointer;
+    transition: all 0.3s;
+    display: block;
+    margin-top: 0;
+}
+
+#clear-cart-btn:hover {
+    border-color: #E24C55;
+    color: #E24C55;
+    background-color: #fff5f5; /* Легкий розовый фон */
+}
+
+/* 3. Кнопки количества (+ и -) */
+.quantity-control {
+    display: flex;         /* Выравниваем в ряд */
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;    /* Скругляем весь блок */
+    overflow: hidden;
+    width: fit-content;    /* Ширина по содержимому */
+}
+
+.quantity-btn {
+    background-color: #f9f9f9;
+    border: none;          /* Убираем внутренние границы */
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.quantity-btn:active {
+    background-color: #ccc;
+}
+
+.quantity-value {
+    display: inline-block;
+    width: 30px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    background: #fff;      /* Белый фон под цифрой */
+    height: 30px;
+    line-height: 30px;     /* Центровка текста по вертикали */
+}

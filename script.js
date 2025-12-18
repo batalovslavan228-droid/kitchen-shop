@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formGroup.classList.add('error');
             formGroup.classList.remove('success');
             errorDisplay.innerText = message;
-            errorDisplay.style.display = 'block'; // Показываем ошибку
+            errorDisplay.style.display = 'block';
         }
     }
 
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formGroup.classList.add('success');
             formGroup.classList.remove('error');
             errorDisplay.innerText = '';
-            errorDisplay.style.display = 'none'; // Скрываем ошибку
+            errorDisplay.style.display = 'none';
         }
     }
 
@@ -44,14 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const password2 = document.getElementById('reg-password2');
             let isValid = true;
 
-            // Валидация полей
             if(username.value.trim() === '') { setError(username, 'Введите имя'); isValid = false; } else setSuccess(username);
             if(!isValidEmail(email.value.trim())) { setError(email, 'Некорректный email'); isValid = false; } else setSuccess(email);
             if(password.value.trim().length < 6) { setError(password, 'Пароль мин. 6 символов'); isValid = false; } else setSuccess(password);
             if(password2.value.trim() !== password.value.trim()) { setError(password2, 'Пароли не совпадают'); isValid = false; } else setSuccess(password2);
 
             if (isValid) {
-                // Отправляем данные на твой сервер (server.js)
                 fetch('/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -67,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         alert('Регистрация успешна! Теперь войдите.');
                         window.location.href = 'login.html';
                     } else {
-                        // Если сервер вернул ошибку (например, email занят)
                         alert('Ошибка: ' + data.message);
                     }
                 })
@@ -82,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
        ======================================================================== */
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
-        // Если уже вошли — редирект в кабинет
         if (localStorage.getItem('isLoggedIn') === 'true') {
             window.location.href = 'account.html';
         }
@@ -97,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setSuccess(password);
             if(loginError) loginError.style.display = 'none';
 
-            // Запрос на сервер
             fetch('/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -109,15 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Сервер подтвердил вход
                     localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('kitchenShopUserName', data.user.username); // Имя из БД
-                    localStorage.setItem('kitchenShopUserEmail', data.user.email);   // Email из БД
+                    localStorage.setItem('kitchenShopUserName', data.user.username);
+                    localStorage.setItem('kitchenShopUserEmail', data.user.email);
                     
                     alert('Вход выполнен!');
                     window.location.href = 'account.html';
                 } else {
-                    // Ошибка (неверный пароль или юзер не найден)
                     setError(email, '');
                     setError(password, '');
                     if(loginError) {
@@ -136,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
        ======================================================================== */
     const accountUsername = document.getElementById('account-username');
     
-    // Логика страницы Личного Кабинета
     if (accountUsername) { 
         if (localStorage.getItem('isLoggedIn') !== 'true') {
             window.location.href = 'login.html';
@@ -153,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Обновление иконки профиля в шапке (если вошел - ведет в кабинет)
     const profileLink = document.getElementById('profile-link');
     if (profileLink && localStorage.getItem('isLoggedIn') === 'true') {
         profileLink.href = 'account.html';
@@ -161,19 +152,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /* ========================================================================
-       5. КОРЗИНА (ДОБАВЛЕНИЕ И ОТОБРАЖЕНИЕ)
+       5. КОРЗИНА (ОБНОВЛЕННАЯ ЛОГИКА С КОЛИЧЕСТВОМ)
        ======================================================================== */
-
+    
     // --- А. Кнопка "Добавить в корзину" (на странице товара) ---
     const addToCartBtn = document.getElementById('buy-now-btn');
     
-    // Проверяем, что мы на странице товара (есть кнопка) и НЕ в самой корзине
-    if (addToCartBtn && !document.getElementById('cart-items-container')) {
+    if (addToCartBtn) {
         addToCartBtn.addEventListener('click', () => {
             const title = document.querySelector('.product-info h1').innerText;
             const price = document.querySelector('.product-info .price').innerText;
             
-            // Ищем картинку: сначала пробуем главную из галереи, если нет - обычную
             let imageSrc = '';
             const mainGalImg = document.getElementById('main-product-img');
             if (mainGalImg) {
@@ -183,13 +172,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(simpleImg) imageSrc = simpleImg.src;
             }
 
-            const product = { name: title, price: price, image: imageSrc };
-            
-            // Сохраняем в localStorage
             let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-            cart.push(product);
-            localStorage.setItem('shoppingCart', JSON.stringify(cart));
             
+            // Проверяем, есть ли уже этот товар в корзине
+            let existingProduct = cart.find(item => item.name === title);
+
+            if (existingProduct) {
+                // Если есть - увеличиваем количество
+                existingProduct.quantity = (existingProduct.quantity || 1) + 1;
+            } else {
+                // Если нет - добавляем новый объект
+                cart.push({ 
+                    name: title, 
+                    price: price, 
+                    image: imageSrc, 
+                    quantity: 1 
+                });
+            }
+            
+            localStorage.setItem('shoppingCart', JSON.stringify(cart));
             alert('Товар добавлен в корзину!');
         });
     }
@@ -198,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartItemsContainer = document.getElementById('cart-items-container');
     
     if (cartItemsContainer) {
-        renderCart(); // Рисуем товары при загрузке
+        renderCart(); // Рисуем корзину
 
         // Кнопка "Очистить корзину"
         const clearBtn = document.getElementById('clear-cart-btn');
@@ -211,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Модальное окно оформления заказа
+        // Оформление заказа
         const checkoutBtn = document.getElementById('checkout-btn');
         const modal = document.getElementById('purchase-modal');
         const closeModal = document.getElementById('modal-close-btn');
@@ -236,21 +237,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(e.target === modal) modal.classList.remove('active');
             });
 
-            // Отправка формы заказа
             if(purchaseForm) {
                 purchaseForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    // Тут простая валидация
                     const name = document.getElementById('purchase-name');
                     const phone = document.getElementById('purchase-phone');
                     const address = document.getElementById('purchase-address');
                     
                     if(name.value.trim() !== '' && phone.value.trim() !== '' && address.value.trim() !== '') {
                         alert(`Спасибо, ${name.value}! Ваш заказ успешно оформлен.`);
-                        localStorage.removeItem('shoppingCart'); // Очищаем корзину
+                        localStorage.removeItem('shoppingCart'); 
                         modal.classList.remove('active');
                         purchaseForm.reset();
-                        renderCart(); // Перерисовываем пустую корзину
+                        renderCart();
                     } else {
                         alert('Пожалуйста, заполните все поля!');
                     }
@@ -259,19 +258,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- В. Функция отрисовки товаров (Новый Дизайн) ---
+    // --- В. Функция отрисовки (С кнопками + и -) ---
     function renderCart() {
         if (!cartItemsContainer) return;
 
         let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-        cartItemsContainer.innerHTML = ''; // Очищаем контейнер
+        cartItemsContainer.innerHTML = '';
         let total = 0;
         let totalCount = 0;
 
         const checkoutBtn = document.getElementById('checkout-btn');
 
         if (cart.length === 0) {
-            // Если пусто
             cartItemsContainer.innerHTML = '<div style="text-align:center; padding: 40px;"><i class="fas fa-shopping-basket" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i><p style="font-size: 18px;">В корзине пока пусто</p><a href="catalog.html" style="color: #E24C55; text-decoration: none; font-weight: 600;">Перейти к покупкам</a></div>';
             if(checkoutBtn) {
                 checkoutBtn.disabled = true;
@@ -279,7 +277,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkoutBtn.style.cursor = 'not-allowed';
             }
         } else {
-            // Если есть товары
             if(checkoutBtn) {
                 checkoutBtn.disabled = false;
                 checkoutBtn.style.opacity = '1';
@@ -287,18 +284,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             cart.forEach((item, index) => {
-                // Чистим цену от "руб." и пробелов
                 let priceNumber = parseInt(item.price.replace(/\D/g, '')); 
-                // Генерируем "старую цену" для красоты (+30%)
+                let qty = item.quantity || 1; // Если кол-ва нет, считаем как 1
                 let oldPriceNumber = Math.round(priceNumber * 1.3);
                 
-                total += priceNumber;
-                totalCount++;
+                total += priceNumber * qty; // Умножаем цену на кол-во
+                totalCount += qty;
 
                 const itemDiv = document.createElement('div');
                 itemDiv.classList.add('cart-item');
                 
-                // HTML структура карточки в корзине
+                // HTML карточки в корзине
                 itemDiv.innerHTML = `
                     <div class="cart-checkbox">
                         <i class="fas fa-check-square" style="color: #E24C55;"></i>
@@ -310,14 +306,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     <div class="cart-item-info">
                         <h3>${item.name}</h3>
-                        <a href="#" class="accessories-link">Показать все аксессуары &gt;</a>
-                    </div>
+                        </div>
 
                     <div class="cart-controls">
                         <div class="quantity-control">
-                            <button class="quantity-btn" disabled>-</button>
-                            <div class="quantity-value">1</div>
-                            <button class="quantity-btn" disabled>+</button>
+                            <button class="quantity-btn" onclick="changeQuantity(${index}, -1)">-</button>
+                            <div class="quantity-value">${qty}</div>
+                            <button class="quantity-btn" onclick="changeQuantity(${index}, 1)">+</button>
                         </div>
                         <div class="cart-actions-links">
                             <span class="action-link" onclick="removeItem(${index})">Удалить</span>
@@ -326,32 +321,48 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <div class="cart-price-block">
-                        <span class="price-current">${priceNumber.toLocaleString()} ₽</span>
-                        <span class="price-old">${oldPriceNumber.toLocaleString()} ₽</span>
+                        <span class="price-current">${(priceNumber * qty).toLocaleString()} ₽</span>
+                        <span class="price-old">${(oldPriceNumber * qty).toLocaleString()} ₽</span>
                     </div>
                 `;
                 cartItemsContainer.appendChild(itemDiv);
             });
         }
 
-        // Обновляем итоги справа
         const countEl = document.getElementById('cart-count');
         const totalEl = document.getElementById('cart-total-price');
         if(countEl) countEl.innerText = totalCount + ' шт.';
         if(totalEl) totalEl.innerText = total.toLocaleString() + ' руб.';
     }
 
-    // Глобальная функция удаления (чтобы работала из onclick в HTML)
+    // Глобальная функция удаления
     window.removeItem = function(index) {
         let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-        cart.splice(index, 1); // Удаляем элемент по индексу
+        cart.splice(index, 1);
+        localStorage.setItem('shoppingCart', JSON.stringify(cart));
+        renderCart();
+    };
+
+    // Глобальная функция изменения количества (+ или -)
+    window.changeQuantity = function(index, change) {
+        let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+        if (cart[index]) {
+            // Берем текущее кол-во или 1
+            let currentQty = cart[index].quantity || 1;
+            let newQty = currentQty + change;
+
+            // Не даем сделать меньше 1
+            if (newQty < 1) newQty = 1;
+
+            cart[index].quantity = newQty;
+        }
         localStorage.setItem('shoppingCart', JSON.stringify(cart));
         renderCart(); // Перерисовываем
     };
 
 
     /* ========================================================================
-       6. ГАЛЕРЕЯ ИЗОБРАЖЕНИЙ (СТРАНИЦЫ ТОВАРОВ)
+       6. ГАЛЕРЕЯ ИЗОБРАЖЕНИЙ
        ======================================================================== */
     const mainImage = document.getElementById('main-product-img');
     const thumbs = document.querySelectorAll('.gallery-thumb');
@@ -362,14 +373,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentIndex = 0;
 
         function updateGallery(index) {
-            // Снимаем класс active со всех
             thumbs.forEach(t => t.classList.remove('active'));
-            // Ставим активной текущей
             thumbs[index].classList.add('active');
             
-            // Меняем картинку
             const newSrc = thumbs[index].getAttribute('src');
-            mainImage.style.opacity = 0; // Эффект мигания
+            mainImage.style.opacity = 0;
             setTimeout(() => {
                 mainImage.src = newSrc;
                 mainImage.style.opacity = 1;
@@ -378,21 +386,19 @@ document.addEventListener('DOMContentLoaded', () => {
             currentIndex = index;
         }
 
-        // Клик по миниатюрам
         thumbs.forEach((thumb, index) => {
             thumb.addEventListener('click', () => updateGallery(index));
         });
 
-        // Стрелки
         if (arrowPrev && arrowNext) {
             arrowPrev.addEventListener('click', () => {
                 let newIndex = currentIndex - 1;
-                if (newIndex < 0) newIndex = thumbs.length - 1; // Зацикливание
+                if (newIndex < 0) newIndex = thumbs.length - 1;
                 updateGallery(newIndex);
             });
             arrowNext.addEventListener('click', () => {
                 let newIndex = currentIndex + 1;
-                if (newIndex >= thumbs.length) newIndex = 0; // Зацикливание
+                if (newIndex >= thumbs.length) newIndex = 0;
                 updateGallery(newIndex);
             });
         }
@@ -403,7 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
        7. API ЯНДЕКС КАРТЫ
        ======================================================================== */
     const mapEl = document.getElementById('map');
-    // Проверяем наличие элемента карты и загружен ли скрипт Яндекса
     if (mapEl && typeof ymaps !== 'undefined') {
         ymaps.ready(() => {
             const center = [55.7758, 37.6852];
@@ -417,6 +422,123 @@ document.addEventListener('DOMContentLoaded', () => {
             map.controls.remove('trafficControl');
         });
     }
-    
+
+
+    /* ========================================================================
+       8. ИЗБРАННОЕ (ЛОГИКА)
+       ======================================================================== */
+    const favButtons = document.querySelectorAll('.add-to-favorites, .add-to-favorites-catalog');
+    let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
+
+    function updateHeartIcons() {
+        favButtons.forEach(btn => {
+            const id = btn.getAttribute('data-id');
+            const icon = btn.querySelector('i');
+            
+            if(!id || !icon) return;
+
+            const exists = favorites.some(item => item.id === id);
+            
+            if (exists) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                icon.style.color = '#E24C55';
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                icon.style.color = '';
+            }
+        });
+    }
+
+    updateHeartIcons();
+
+    favButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            e.stopPropagation(); 
+
+            const product = {
+                id: btn.getAttribute('data-id'),
+                name: btn.getAttribute('data-name'),
+                price: btn.getAttribute('data-price'),
+                img: btn.getAttribute('data-img'),
+                link: btn.getAttribute('data-link')
+            };
+
+            if (!product.id) return; 
+
+            const index = favorites.findIndex(item => item.id === product.id);
+
+            if (index === -1) {
+                favorites.push(product);
+            } else {
+                favorites.splice(index, 1);
+            }
+
+            localStorage.setItem('myFavorites', JSON.stringify(favorites));
+            updateHeartIcons();
+        });
+    });
+
+
+    /* ========================================================================
+       9. ОТРИСОВКА ИЗБРАННОГО
+       ======================================================================== */
+    const favoritesContainer = document.getElementById('favorites-container');
+
+    if (favoritesContainer) {
+        renderFavoritesPage();
+    }
+
+    function renderFavoritesPage() {
+        let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
+        favoritesContainer.innerHTML = '';
+
+        if (favorites.length === 0) {
+            favoritesContainer.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #888;">
+                    <i class="far fa-heart" style="font-size: 60px; margin-bottom: 20px; opacity: 0.3;"></i>
+                    <h2>Список избранного пуст</h2>
+                    <p>Перейдите в <a href="catalog.html" style="color: #E24C55;">каталог</a>, чтобы добавить товары.</p>
+                </div>`;
+            return;
+        }
+
+        favorites.forEach(item => {
+            const card = document.createElement('div');
+            card.classList.add('product-card');
+            card.style.position = 'relative';
+
+            card.innerHTML = `
+                <button class="remove-from-fav" data-id="${item.id}" style="position: absolute; top: 10px; right: 10px; z-index: 10; background: white; border: 1px solid #eee; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-times" style="color: #888;"></i>
+                </button>
+
+                <a href="${item.link}" class="product-clickable-area" style="text-decoration:none; color:inherit;">
+                    <div class="image-container" style="text-align:center; margin-bottom:10px;">
+                        <img src="${item.img}" alt="${item.name}" style="max-width:100%; height:150px; object-fit:contain;">
+                    </div>
+                    <div class="product-info-bottom" style="padding:10px;">
+                        <h3 style="font-size:16px; margin: 10px 0;">${item.name}</h3>
+                        <div class="price-container">
+                            <span class="price" style="font-weight:bold; color:#E24C55; font-size:18px;">${item.price}</span>
+                        </div>
+                    </div>
+                </a>
+            `;
+            favoritesContainer.appendChild(card);
+        });
+
+        document.querySelectorAll('.remove-from-fav').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idToRemove = btn.getAttribute('data-id');
+                favorites = favorites.filter(item => item.id !== idToRemove);
+                localStorage.setItem('myFavorites', JSON.stringify(favorites));
+                renderFavoritesPage();
+                updateHeartIcons(); 
+            });
+        });
+    }
 
 }); // Конец DOMContentLoaded
