@@ -2015,9 +2015,3 @@ button:disabled {
         transform: translateX(50px);
     }
 }
-/* Иконка авторизованного пользователя */
-.header-icons .fa-user-check {
-    color: #4CAF50; /* Зеленый цвет */
-    transform: scale(1.1); /* Чуть крупнее */
-    transition: all 0.3s;
-}

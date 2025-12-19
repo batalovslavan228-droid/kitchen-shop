@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     /* ========================================================================
-       0. СИСТЕМА УВЕДОМЛЕНИЙ (ВМЕСТО ALERT)
+       0. СИСТЕМА УВЕДОМЛЕНИЙ (TOASTS)
        ======================================================================== */
     let notifyContainer = document.getElementById('notification-container');
     if (!notifyContainer) {
@@ -22,32 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ========================================================================
-       0.1. VISUAL AUTH CHECK (Иконка профиля)
-       ======================================================================== */
-    function updateProfileIcon() {
-        const profileLink = document.getElementById('profile-link');
-        if (!profileLink) return;
-        
-        const icon = profileLink.querySelector('i');
-        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-
-        if (isLoggedIn) {
-            // Если вошли: иконка с галочкой
-            icon.className = 'fas fa-user-check';
-            icon.style.color = '#4CAF50'; // Зеленый цвет для наглядности
-            profileLink.title = "Вы авторизованы";
-        } else {
-            // Если нет: обычная иконка
-            icon.className = 'far fa-user';
-            icon.style.color = ''; 
-            profileLink.title = "Войти";
-        }
-    }
-    // Запускаем сразу при загрузке
-    updateProfileIcon();
-
-
-    /* ========================================================================
        1. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (ВАЛИДАЦИИ)
        ======================================================================== */
     function setError(element, message) {
@@ -55,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const errorDisplay = formGroup.querySelector('.error-message');
         if (errorDisplay) {
             formGroup.classList.add('error');
-            formGroup.classList.remove('success');
             errorDisplay.innerText = message;
             errorDisplay.style.display = 'block';
         }
@@ -65,9 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const formGroup = element.parentElement;
         const errorDisplay = formGroup.querySelector('.error-message');
         if (errorDisplay) {
-            formGroup.classList.add('success');
             formGroup.classList.remove('error');
-            errorDisplay.innerText = '';
+            formGroup.classList.add('success');
             errorDisplay.style.display = 'none';
         }
     }
@@ -77,9 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return re.test(String(email).toLowerCase());
     }
 
+    // ВАЖНО: Проверка телефона (оставили, как ты просил)
     function isValidPhone(phone) {
-        const re = /^[\d\+\-\(\)\s]+$/;
-        const digits = phone.replace(/\D/g, ''); 
+        const re = /^[\d\+\-\(\)\s]+$/; // Разрешаем цифры и символы +, -, (, )
+        const digits = phone.replace(/\D/g, ''); // Считаем только цифры
         return re.test(phone) && digits.length >= 10 && digits.length <= 15;
     }
 
@@ -95,14 +68,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = document.getElementById('reg-email');
             const password = document.getElementById('reg-password');
             const password2 = document.getElementById('reg-password2');
-            let isValid = true;
+            
+            // Простая валидация для формы регистрации
+            let valid = true;
+            if(username.value.trim() === '') { setError(username, 'Введите имя'); valid=false; } else setSuccess(username);
+            if(!isValidEmail(email.value.trim())) { setError(email, 'Некорректный email'); valid=false; } else setSuccess(email);
+            if(password.value.trim().length < 6) { setError(password, 'Мин. 6 символов'); valid=false; } else setSuccess(password);
+            if(password2.value.trim() !== password.value.trim()) { setError(password2, 'Пароли не совпадают'); valid=false; } else setSuccess(password2);
 
-            if(username.value.trim() === '') { setError(username, 'Введите имя'); isValid = false; } else setSuccess(username);
-            if(!isValidEmail(email.value.trim())) { setError(email, 'Некорректный email'); isValid = false; } else setSuccess(email);
-            if(password.value.trim().length < 6) { setError(password, 'Пароль мин. 6 символов'); isValid = false; } else setSuccess(password);
-            if(password2.value.trim() !== password.value.trim()) { setError(password2, 'Пароли не совпадают'); isValid = false; } else setSuccess(password2);
-
-            if (isValid) {
+            if (valid) {
                 fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -112,19 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         password: password.value.trim()
                     })
                 })
-                .then(response => response.json())
+                .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        showNotify('Регистрация успешна! Теперь войдите.', 'success');
+                        showNotify('Регистрация успешна!', 'success');
                         setTimeout(() => window.location.href = 'login.html', 1500);
                     } else {
-                        showNotify('Ошибка: ' + data.message, 'error');
+                        showNotify(data.message, 'error');
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotify('Ошибка соединения с сервером', 'error');
-                });
+                .catch(() => showNotify('Ошибка сервера', 'error'));
             }
         });
     }
@@ -135,90 +106,65 @@ document.addEventListener('DOMContentLoaded', () => {
        ======================================================================== */
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            window.location.href = 'account.html';
-        }
+        if (localStorage.getItem('isLoggedIn') === 'true') window.location.href = 'account.html';
 
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email');
             const password = document.getElementById('login-password');
-            const loginError = document.getElementById('login-error');
-            
-            setSuccess(email); 
-            setSuccess(password);
-            if(loginError) loginError.style.display = 'none';
 
             fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: email.value.trim(),
-                    password: password.value.trim()
-                })
+                body: JSON.stringify({ email: email.value.trim(), password: password.value.trim() })
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('kitchenShopUserId', data.user.id); // Важно: ID!
+                    localStorage.setItem('kitchenShopUserId', data.user.id);
                     localStorage.setItem('kitchenShopUserName', data.user.username);
                     localStorage.setItem('kitchenShopUserEmail', data.user.email);
-                    
-                    updateProfileIcon(); // Обновляем иконку
-                    showNotify('Вход выполнен успешно!', 'success');
+                    showNotify('Вход выполнен!', 'success');
                     setTimeout(() => window.location.href = 'account.html', 1000);
                 } else {
-                    setError(email, '');
-                    setError(password, '');
-                    if(loginError) {
-                        loginError.textContent = data.message;
-                        loginError.style.display = 'block';
-                    }
                     showNotify(data.message, 'error');
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotify('Ошибка сервера', 'error');
-            });
+            .catch(() => showNotify('Ошибка сервера', 'error'));
         });
     }
 
 
     /* ========================================================================
-       4. ЛИЧНЫЙ КАБИНЕТ И ШАПКА
+       4. ЛИЧНЫЙ КАБИНЕТ
        ======================================================================== */
     const accountUsername = document.getElementById('account-username');
-    
     if (accountUsername) { 
         if (localStorage.getItem('isLoggedIn') !== 'true') {
             window.location.href = 'login.html';
         } else {
-            document.getElementById('account-username').textContent = localStorage.getItem('kitchenShopUserName') || 'Пользователь';
-            document.getElementById('account-email').textContent = localStorage.getItem('kitchenShopUserEmail') || 'email@example.com';
+            document.getElementById('account-username').textContent = localStorage.getItem('kitchenShopUserName');
+            document.getElementById('account-email').textContent = localStorage.getItem('kitchenShopUserEmail');
             
             document.getElementById('logout-button').addEventListener('click', () => {
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('kitchenShopUserId');
-                localStorage.removeItem('kitchenShopUserName');
-                localStorage.removeItem('kitchenShopUserEmail');
-                
-                updateProfileIcon(); // Возвращаем обычную иконку
-                showNotify('Вы вышли из аккаунта', 'info');
+                localStorage.clear(); // Полная очистка при выходе
+                showNotify('Вы вышли', 'info');
                 setTimeout(() => window.location.href = 'login.html', 1000);
             });
         }
     }
-
+    
+    // Ссылка профиля просто ведет куда надо
     const profileLink = document.getElementById('profile-link');
     if (profileLink && localStorage.getItem('isLoggedIn') === 'true') {
         profileLink.href = 'account.html';
+        profileLink.style.color = '#E24C55'; // Подсветка если вошли
     }
 
 
     /* ========================================================================
-       5. КОРЗИНА
+       5. КОРЗИНА (ОФОРМЛЕНИЕ ЗАКАЗА)
        ======================================================================== */
     
     // А. Добавление в корзину
@@ -227,26 +173,15 @@ document.addEventListener('DOMContentLoaded', () => {
         addToCartBtn.addEventListener('click', () => {
             const title = document.querySelector('.product-info h1').innerText;
             const price = document.querySelector('.product-info .price').innerText;
-            
-            let imageSrc = '';
-            const mainGalImg = document.getElementById('main-product-img');
-            if (mainGalImg) imageSrc = mainGalImg.src;
-            else {
-                const simpleImg = document.querySelector('.product-image img');
-                if(simpleImg) imageSrc = simpleImg.src;
-            }
+            let imageSrc = document.getElementById('main-product-img') ? document.getElementById('main-product-img').src : document.querySelector('.product-image img').src;
 
             let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-            let existingProduct = cart.find(item => item.name === title);
-
-            if (existingProduct) {
-                existingProduct.quantity = (existingProduct.quantity || 1) + 1;
-            } else {
-                cart.push({ name: title, price: price, image: imageSrc, quantity: 1 });
-            }
+            let existing = cart.find(i => i.name === title);
+            if(existing) existing.quantity = (existing.quantity || 1) + 1;
+            else cart.push({ name: title, price: price, image: imageSrc, quantity: 1 });
             
             localStorage.setItem('shoppingCart', JSON.stringify(cart));
-            showNotify('Товар добавлен в корзину', 'success');
+            showNotify('Товар в корзине', 'success');
             updateCartCount();
         });
     }
@@ -254,56 +189,42 @@ document.addEventListener('DOMContentLoaded', () => {
     // Б. Страница Корзины
     const cartItemsContainer = document.getElementById('cart-items-container');
     if (cartItemsContainer) {
-        renderCart(); 
+        renderCart();
 
         const clearBtn = document.getElementById('clear-cart-btn');
         if(clearBtn) {
             clearBtn.addEventListener('click', () => {
-                if(confirm('Вы уверены, что хотите очистить корзину?')) {
+                if(confirm('Очистить корзину?')) {
                     localStorage.removeItem('shoppingCart');
                     renderCart();
-                    showNotify('Корзина очищена', 'info');
                 }
             });
         }
 
         const checkoutBtn = document.getElementById('checkout-btn');
         const modal = document.getElementById('purchase-modal');
-        const closeModal = document.getElementById('modal-close-btn');
         const purchaseForm = document.getElementById('purchase-form');
 
+        // КНОПКА "ОФОРМИТЬ ЗАКАЗ"
         if (checkoutBtn && modal) {
             checkoutBtn.addEventListener('click', () => {
                 
-                // === 1. ПРОВЕРКА ПО ИКОНКЕ (VISUAL CHECK) ===
-                const profileIcon = document.querySelector('#profile-link i');
+                // === УБРАЛИ ПРОВЕРКУ НА АВТОРИЗАЦИЮ ЗДЕСЬ ===
+                // Просто смотрим, не пустая ли корзина
                 
-                // Если у иконки НЕТ класса с галочкой - значит не авторизован
-                if (!profileIcon || !profileIcon.classList.contains('fa-user-check')) {
-                    showNotify('Войдите в аккаунт для оформления заказа!', 'error');
-                    setTimeout(() => window.location.href = 'login.html', 1500);
-                    return; 
-                }
-
-                // 2. Проверка пустоты корзины
                 const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
                 if (cart.length === 0) {
-                    showNotify('Корзина пуста!', 'error');
+                    showNotify('Корзина пуста', 'error');
                 } else {
-                    modal.classList.add('active');
+                    modal.classList.add('active'); // Сразу открываем окно
                 }
             });
 
-            closeModal.addEventListener('click', (e) => {
-                e.preventDefault();
-                modal.classList.remove('active');
+            document.getElementById('modal-close-btn').addEventListener('click', (e) => {
+                e.preventDefault(); modal.classList.remove('active');
             });
 
-            modal.addEventListener('click', (e) => {
-                if(e.target === modal) modal.classList.remove('active');
-            });
-
-            // Отправка заказа
+            // ОТПРАВКА ФОРМЫ ЗАКАЗА
             if(purchaseForm) {
                 purchaseForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
@@ -311,41 +232,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     const name = document.getElementById('purchase-name').value;
                     const phone = document.getElementById('purchase-phone').value;
                     const address = document.getElementById('purchase-address').value;
-                    const userId = localStorage.getItem('kitchenShopUserId'); // Получаем ID
+                    
+                    // Мы всё равно пытаемся отправить ID юзера, если он есть, но не требуем его жестко в JS
+                    const userId = localStorage.getItem('kitchenShopUserId'); 
 
-                    // Валидация
+                    // ВАЖНО: ВАЛИДАЦИЯ ТЕЛЕФОНА (оставили)
                     if (name.trim() === '') {
-                        showNotify('Введите ваше имя', 'error'); return;
+                        showNotify('Введите имя', 'error'); return;
                     }
                     if (!isValidPhone(phone)) {
                         showNotify('Некорректный телефон (мин. 10 цифр)', 'error'); return;
                     }
                     if (address.trim() === '') {
-                        showNotify('Введите адрес доставки', 'error'); return;
+                        showNotify('Введите адрес', 'error'); return;
                     }
-                        
+
                     try {
-                        const response = await fetch('/api/checkout', {
+                        const res = await fetch('/api/checkout', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ name, phone, address, userId })
+                            body: JSON.stringify({ name, phone, address, userId }) 
                         });
+                        const data = await res.json();
                         
-                        const data = await response.json();
-
-                        if (data.success) {
-                            showNotify(`Заказ №${data.orderId} успешно оформлен!`, 'success');
-                            localStorage.removeItem('shoppingCart'); 
+                        if(data.success) {
+                            showNotify(`Заказ №${data.orderId} оформлен!`, 'success');
+                            localStorage.removeItem('shoppingCart');
                             modal.classList.remove('active');
                             purchaseForm.reset();
                             renderCart();
                         } else {
-                            showNotify('Ошибка сервера: ' + data.message, 'error');
+                            // Если сервер ругается (например, требует ID), покажем ошибку
+                            showNotify('Ошибка: ' + data.message, 'error');
                         }
-                    } catch (err) {
-                        console.error(err);
-                        showNotify('Ошибка соединения с сервером', 'error');
-                    }
+                    } catch(err) { showNotify('Ошибка сети', 'error'); }
                 });
             }
         }
@@ -354,245 +274,135 @@ document.addEventListener('DOMContentLoaded', () => {
     // В. Отрисовка
     function renderCart() {
         if (!cartItemsContainer) return;
-
         let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
         cartItemsContainer.innerHTML = '';
         let total = 0;
-        let totalCount = 0;
-
-        const checkoutBtn = document.getElementById('checkout-btn');
-
-        if (cart.length === 0) {
-            cartItemsContainer.innerHTML = '<div style="text-align:center; padding: 40px;"><i class="fas fa-shopping-basket" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i><p style="font-size: 18px;">В корзине пока пусто</p><a href="catalog.html" style="color: #E24C55; text-decoration: none; font-weight: 600;">Перейти к покупкам</a></div>';
-            if(checkoutBtn) {
-                checkoutBtn.disabled = true;
-                checkoutBtn.style.opacity = '0.5';
-                checkoutBtn.style.cursor = 'not-allowed';
-            }
+        
+        if(cart.length === 0) {
+            cartItemsContainer.innerHTML = '<div style="text-align:center; padding: 40px;">Корзина пуста</div>';
+            document.getElementById('checkout-btn').disabled = true;
         } else {
-            if(checkoutBtn) {
-                checkoutBtn.disabled = false;
-                checkoutBtn.style.opacity = '1';
-                checkoutBtn.style.cursor = 'pointer';
-            }
-
-            cart.forEach((item, index) => {
-                let priceNumber = parseInt(item.price.replace(/\D/g, '')); 
-                let qty = item.quantity || 1; 
-                let oldPriceNumber = Math.round(priceNumber * 1.3);
-                
-                total += priceNumber * qty; 
-                totalCount += qty;
-
-                const itemDiv = document.createElement('div');
-                itemDiv.classList.add('cart-item');
-                
-                itemDiv.innerHTML = `
-                    <div class="cart-checkbox"><i class="fas fa-check-square" style="color: #E24C55;"></i></div>
-                    <div class="cart-img-wrapper"><img src="${item.image}" alt="${item.name}"></div>
-                    <div class="cart-item-info"><h3>${item.name}</h3></div>
-                    <div class="cart-controls">
-                        <div class="quantity-control">
-                            <button class="quantity-btn" onclick="changeQuantity(${index}, -1)">-</button>
-                            <div class="quantity-value">${qty}</div>
-                            <button class="quantity-btn" onclick="changeQuantity(${index}, 1)">+</button>
-                        </div>
-                        <div class="cart-actions-links">
-                            <span class="action-link" onclick="removeItem(${index})">Удалить</span>
-                            <span class="action-link add-from-cart-to-fav" data-idx="${index}">В избранное</span>
-                        </div>
-                    </div>
-                    <div class="cart-price-block">
-                        <span class="price-current">${(priceNumber * qty).toLocaleString()} ₽</span>
-                        <span class="price-old">${(oldPriceNumber * qty).toLocaleString()} ₽</span>
-                    </div>
-                `;
-                cartItemsContainer.appendChild(itemDiv);
-            });
+            document.getElementById('checkout-btn').disabled = false;
         }
 
+        cart.forEach((item, index) => {
+            let price = parseInt(item.price.replace(/\D/g, ''));
+            let qty = item.quantity || 1;
+            total += price * qty;
+            
+            const div = document.createElement('div');
+            div.className = 'cart-item';
+            div.innerHTML = `
+                <div class="cart-checkbox"><i class="fas fa-check-square" style="color:#E24C55"></i></div>
+                <div class="cart-img-wrapper"><img src="${item.image}"></div>
+                <div class="cart-item-info"><h3>${item.name}</h3></div>
+                <div class="cart-controls">
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="chQty(${index}, -1)">-</button>
+                        <div class="quantity-value">${qty}</div>
+                        <button class="quantity-btn" onclick="chQty(${index}, 1)">+</button>
+                    </div>
+                    <span class="action-link" onclick="rmItem(${index})">Удалить</span>
+                </div>
+                <div class="cart-price-block"><span class="price-current">${(price * qty).toLocaleString()} ₽</span></div>
+            `;
+            cartItemsContainer.appendChild(div);
+        });
+        
         const totalEl = document.getElementById('cart-total-price');
         if(totalEl) totalEl.innerText = total.toLocaleString() + ' руб.';
-        
         updateCartCount();
     }
 
     function updateCartCount() {
         let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-        let totalQty = 0;
-        cart.forEach(item => totalQty += (item.quantity || 1));
-        const badge = document.getElementById('cart-count');
-        if (badge) badge.innerText = totalQty;
+        let t = 0; cart.forEach(i => t += (i.quantity || 1));
+        const b = document.getElementById('cart-count');
+        if(b) b.innerText = t;
     }
     updateCartCount();
 
-    window.removeItem = function(index) {
-        let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-        cart.splice(index, 1);
-        localStorage.setItem('shoppingCart', JSON.stringify(cart));
+    window.rmItem = (i) => {
+        let c = JSON.parse(localStorage.getItem('shoppingCart'));
+        c.splice(i, 1);
+        localStorage.setItem('shoppingCart', JSON.stringify(c));
         renderCart();
-        showNotify('Товар удален', 'info');
     };
-
-    window.changeQuantity = function(index, change) {
-        let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-        if (cart[index]) {
-            let currentQty = cart[index].quantity || 1;
-            let newQty = currentQty + change;
-            if (newQty < 1) newQty = 1;
-            cart[index].quantity = newQty;
-        }
-        localStorage.setItem('shoppingCart', JSON.stringify(cart));
-        renderCart(); 
+    window.chQty = (i, d) => {
+        let c = JSON.parse(localStorage.getItem('shoppingCart'));
+        c[i].quantity = Math.max(1, (c[i].quantity || 1) + d);
+        localStorage.setItem('shoppingCart', JSON.stringify(c));
+        renderCart();
     };
-
 
     /* ========================================================================
        6. ГАЛЕРЕЯ
        ======================================================================== */
     const mainImage = document.getElementById('main-product-img');
     const thumbs = document.querySelectorAll('.gallery-thumb');
-    const arrowPrev = document.querySelector('.gallery-arrow.prev');
-    const arrowNext = document.querySelector('.gallery-arrow.next');
-
+    
     if (mainImage && thumbs.length > 0) {
-        let currentIndex = 0;
-        function updateGallery(index) {
-            thumbs.forEach(t => t.classList.remove('active'));
-            thumbs[index].classList.add('active');
-            const newSrc = thumbs[index].getAttribute('src');
-            mainImage.style.opacity = 0;
-            setTimeout(() => { mainImage.src = newSrc; mainImage.style.opacity = 1; }, 200);
-            currentIndex = index;
-        }
-        thumbs.forEach((thumb, index) => thumb.addEventListener('click', () => updateGallery(index)));
-        if (arrowPrev) arrowPrev.addEventListener('click', () => {
-            let newIndex = currentIndex - 1;
-            if (newIndex < 0) newIndex = thumbs.length - 1;
-            updateGallery(newIndex);
-        });
-        if (arrowNext) arrowNext.addEventListener('click', () => {
-            let newIndex = currentIndex + 1;
-            if (newIndex >= thumbs.length) newIndex = 0;
-            updateGallery(newIndex);
+        thumbs.forEach((thumb, index) => {
+            thumb.addEventListener('click', () => {
+                thumbs.forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
+                mainImage.src = thumb.src;
+            });
         });
     }
 
-
     /* ========================================================================
-       7. API ЯНДЕКС КАРТЫ
+       7. ИЗБРАННОЕ
        ======================================================================== */
-    const mapEl = document.getElementById('map');
-    if (mapEl && typeof ymaps !== 'undefined') {
-        ymaps.ready(() => {
-            const center = [55.7758, 37.6852];
-            const map = new ymaps.Map("map", { center: center, zoom: 16 });
-            map.geoObjects.add(new ymaps.Placemark(center, {
-                hintContent: 'Магазин "КухняТех"',
-                balloonContent: 'Мы здесь!'
-            }, { preset: 'islands#redDotIcon' }));
-            map.controls.remove('searchControl');
-            map.controls.remove('trafficControl');
-        });
-    }
-
-
-    /* ========================================================================
-       8. ИЗБРАННОЕ
-       ======================================================================== */
-    const favButtons = document.querySelectorAll('.add-to-favorites, .add-to-favorites-catalog');
+    const favButtons = document.querySelectorAll('.add-to-favorites-catalog');
     let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
-
-    function updateHeartIcons() {
+    
+    function updHearts() {
         favButtons.forEach(btn => {
-            const id = btn.getAttribute('data-id');
+            const id = btn.dataset.id;
             const icon = btn.querySelector('i');
-            if(!id || !icon) return;
-            const exists = favorites.some(item => item.id === id);
-            if (exists) {
-                icon.classList.remove('far'); icon.classList.add('fas'); icon.style.color = '#E24C55';
+            if(favorites.some(f => f.id === id)) {
+                icon.className = 'fas fa-heart'; icon.style.color = '#E24C55';
             } else {
-                icon.classList.remove('fas'); icon.classList.add('far'); icon.style.color = '';
+                icon.className = 'far fa-heart'; icon.style.color = '';
             }
         });
     }
-    updateHeartIcons();
-
+    updHearts();
+    
     favButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.preventDefault(); e.stopPropagation(); 
-            const product = {
-                id: btn.getAttribute('data-id'),
-                name: btn.getAttribute('data-name'),
-                price: btn.getAttribute('data-price'),
-                img: btn.getAttribute('data-img'),
-                link: btn.getAttribute('data-link')
-            };
-            if (!product.id) return; 
-            const index = favorites.findIndex(item => item.id === product.id);
-            if (index === -1) {
-                favorites.push(product);
-                showNotify('Добавлено в избранное', 'success');
-            } else {
-                favorites.splice(index, 1);
-                showNotify('Удалено из избранного', 'info');
-            }
+            e.preventDefault();
+            const p = { id: btn.dataset.id, name: btn.dataset.name, price: btn.dataset.price, img: btn.dataset.img, link: btn.dataset.link };
+            const idx = favorites.findIndex(f => f.id === p.id);
+            if(idx === -1) { favorites.push(p); showNotify('Добавлено в избранное', 'success'); } 
+            else { favorites.splice(idx, 1); showNotify('Удалено', 'info'); }
             localStorage.setItem('myFavorites', JSON.stringify(favorites));
-            updateHeartIcons();
+            updHearts();
         });
     });
 
-
-    /* ========================================================================
-       9. ОТРИСОВКА ИЗБРАННОГО
-       ======================================================================== */
-    const favoritesContainer = document.getElementById('favorites-container');
-    if (favoritesContainer) {
-        renderFavoritesPage();
-    }
-
-    function renderFavoritesPage() {
-        let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
-        favoritesContainer.innerHTML = '';
-
-        if (favorites.length === 0) {
-            favoritesContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #888;">
-                <i class="far fa-heart" style="font-size: 60px; margin-bottom: 20px; opacity: 0.3;"></i>
-                <h2>Список избранного пуст</h2>
-                <p>Перейдите в <a href="catalog.html" style="color: #E24C55;">каталог</a></p></div>`;
-            return;
-        }
-
-        favorites.forEach(item => {
-            const card = document.createElement('div');
-            card.classList.add('product-card');
-            card.style.position = 'relative';
-            card.innerHTML = `
-                <button class="remove-from-fav" data-id="${item.id}" style="position: absolute; top: 10px; right: 10px; z-index: 10; background: white; border: 1px solid #eee; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display:flex; align-items:center; justify-content:center;">
-                    <i class="fas fa-times" style="color: #888;"></i>
-                </button>
-                <a href="${item.link}" class="product-clickable-area" style="text-decoration:none; color:inherit;">
-                    <div class="image-container" style="text-align:center; margin-bottom:10px;">
-                        <img src="${item.img}" alt="${item.name}" style="max-width:100%; height:150px; object-fit:contain;">
-                    </div>
-                    <div class="product-info-bottom" style="padding:10px;">
-                        <h3 style="font-size:16px; margin: 10px 0;">${item.name}</h3>
-                        <div class="price-container"><span class="price" style="font-weight:bold; color:#E24C55; font-size:18px;">${item.price}</span></div>
-                    </div>
-                </a>
-            `;
-            favoritesContainer.appendChild(card);
-        });
-
-        document.querySelectorAll('.remove-from-fav').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const idToRemove = btn.getAttribute('data-id');
-                favorites = favorites.filter(item => item.id !== idToRemove);
-                localStorage.setItem('myFavorites', JSON.stringify(favorites));
-                renderFavoritesPage();
-                updateHeartIcons(); 
+    const favCont = document.getElementById('favorites-container');
+    if(favCont) {
+        if(favorites.length === 0) favCont.innerHTML = '<div style="padding:40px; text-align:center">Пусто</div>';
+        else {
+            favorites.forEach(f => {
+                const d = document.createElement('div');
+                d.className = 'product-card';
+                d.innerHTML = `
+                    <button class="remove-from-fav" data-id="${f.id}" style="position:absolute; right:10px; top:10px;">X</button>
+                    <a href="${f.link}"><img src="${f.img}" style="height:100px; display:block; margin:0 auto;"><h3>${f.name}</h3></a>
+                `;
+                favCont.appendChild(d);
             });
-        });
+            document.querySelectorAll('.remove-from-fav').forEach(b => {
+                b.addEventListener('click', (e) => {
+                    favorites = favorites.filter(f => f.id !== e.target.dataset.id);
+                    localStorage.setItem('myFavorites', JSON.stringify(favorites));
+                    location.reload();
+                });
+            });
+        }
     }
 
 });
