@@ -30,6 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return re.test(String(email).toLowerCase());
     }
 
+    // НОВАЯ ФУНКЦИЯ: Проверка телефона
+    function isValidPhone(phone) {
+        // Разрешаем цифры, +, -, скобки и пробелы
+        const re = /^[\d\+\-\(\)\s]+$/;
+        // Проверяем, что символы правильные И что цифр не меньше 10
+        const digits = phone.replace(/\D/g, ''); 
+        return re.test(phone) && digits.length >= 10 && digits.length <= 15;
+    }
+
 
     /* ========================================================================
        2. РЕГИСТРАЦИЯ (ОТПРАВКА НА СЕРВЕР)
@@ -152,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /* ========================================================================
-       5. КОРЗИНА (ОФОРМЛЕНИЕ ЗАКАЗА В БД)
+       5. КОРЗИНА (ОФОРМЛЕНИЕ ЗАКАЗА В БД + ПРОВЕРКИ)
        ======================================================================== */
     
     // А. Кнопка "Добавить в корзину"
@@ -217,10 +226,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (checkoutBtn && modal) {
             checkoutBtn.addEventListener('click', () => {
+                // 1. ПРОВЕРКА: Авторизован ли пользователь?
+                if (localStorage.getItem('isLoggedIn') !== 'true') {
+                    alert('Для оформления заказа необходимо войти в аккаунт!');
+                    window.location.href = 'login.html';
+                    return; // Прерываем функцию, окно не откроется
+                }
+
+                // 2. ПРОВЕРКА: Не пустая ли корзина?
                 const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
                 if (cart.length === 0) {
                     alert('Корзина пуста!');
                 } else {
+                    // Если все ок, открываем окно
                     modal.classList.add('active');
                 }
             });
@@ -243,35 +261,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     const phone = document.getElementById('purchase-phone').value;
                     const address = document.getElementById('purchase-address').value;
                     
-                    if(name.trim() !== '' && phone.trim() !== '' && address.trim() !== '') {
+                    // 3. ПРОВЕРКА: Валидация полей
+                    if (name.trim() === '') {
+                        alert('Введите ваше имя');
+                        return;
+                    }
+                    if (!isValidPhone(phone)) {
+                        alert('Введите корректный номер телефона (минимум 10 цифр)');
+                        return;
+                    }
+                    if (address.trim() === '') {
+                        alert('Введите адрес доставки');
+                        return;
+                    }
                         
-                        try {
-                            // Отправляем данные на API
-                            const response = await fetch('/api/checkout', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ name, phone, address })
-                            });
-                            
-                            const data = await response.json();
+                    try {
+                        // Отправляем данные на API
+                        const response = await fetch('/api/checkout', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, phone, address })
+                        });
+                        
+                        const data = await response.json();
 
-                            if (data.success) {
-                                // Если сервер сказал ОК
-                                alert(`Спасибо, ${name}! Заказ №${data.orderId} успешно оформлен.`);
-                                localStorage.removeItem('shoppingCart'); 
-                                modal.classList.remove('active');
-                                purchaseForm.reset();
-                                renderCart();
-                            } else {
-                                alert('Ошибка сервера: ' + data.message);
-                            }
-                        } catch (err) {
-                            console.error(err);
-                            alert('Ошибка соединения с сервером');
+                        if (data.success) {
+                            // Если сервер сказал ОК
+                            alert(`Спасибо, ${name}! Заказ №${data.orderId} успешно оформлен.`);
+                            localStorage.removeItem('shoppingCart'); 
+                            modal.classList.remove('active');
+                            purchaseForm.reset();
+                            renderCart();
+                        } else {
+                            alert('Ошибка сервера: ' + data.message);
                         }
-
-                    } else {
-                        alert('Пожалуйста, заполните все поля!');
+                    } catch (err) {
+                        console.error(err);
+                        alert('Ошибка соединения с сервером');
                     }
                 });
             }
