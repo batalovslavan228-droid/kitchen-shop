@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ========================================================================
        0. СИСТЕМА УВЕДОМЛЕНИЙ (ВМЕСТО ALERT)
        ======================================================================== */
-    // Создаем контейнер для уведомлений, если его нет
     let notifyContainer = document.getElementById('notification-container');
     if (!notifyContainer) {
         notifyContainer = document.createElement('div');
@@ -11,23 +10,41 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(notifyContainer);
     }
 
-    // Функция показа уведомления
-    // type может быть: 'success' (зеленый), 'error' (красный), 'info' (синий)
     function showNotify(message, type = 'info') {
         const notify = document.createElement('div');
         notify.classList.add('notification', type);
         notify.innerText = message;
-
         notifyContainer.appendChild(notify);
-
-        // Удаляем через 3 секунды
         setTimeout(() => {
             notify.style.animation = 'fadeOut 0.3s forwards';
-            notify.addEventListener('animationend', () => {
-                notify.remove();
-            });
+            notify.addEventListener('animationend', () => notify.remove());
         }, 3000);
     }
+
+    /* ========================================================================
+       0.1. VISUAL AUTH CHECK (Иконка профиля)
+       ======================================================================== */
+    function updateProfileIcon() {
+        const profileLink = document.getElementById('profile-link');
+        if (!profileLink) return;
+        
+        const icon = profileLink.querySelector('i');
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+        if (isLoggedIn) {
+            // Если вошли: иконка с галочкой
+            icon.className = 'fas fa-user-check';
+            icon.style.color = '#4CAF50'; // Зеленый цвет для наглядности
+            profileLink.title = "Вы авторизованы";
+        } else {
+            // Если нет: обычная иконка
+            icon.className = 'far fa-user';
+            icon.style.color = ''; 
+            profileLink.title = "Войти";
+        }
+    }
+    // Запускаем сразу при загрузке
+    updateProfileIcon();
 
 
     /* ========================================================================
@@ -86,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(password2.value.trim() !== password.value.trim()) { setError(password2, 'Пароли не совпадают'); isValid = false; } else setSuccess(password2);
 
             if (isValid) {
-                fetch('/register', {
+                fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -118,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
        ======================================================================== */
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
-        // Проверка при загрузке страницы входа
         if (localStorage.getItem('isLoggedIn') === 'true') {
             window.location.href = 'account.html';
         }
@@ -133,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setSuccess(password);
             if(loginError) loginError.style.display = 'none';
 
-            fetch('/login', {
+            fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -144,11 +160,12 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // ВАЖНО: Устанавливаем флаг входа
                     localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('kitchenShopUserId', data.user.id); // Важно: ID!
                     localStorage.setItem('kitchenShopUserName', data.user.username);
                     localStorage.setItem('kitchenShopUserEmail', data.user.email);
                     
+                    updateProfileIcon(); // Обновляем иконку
                     showNotify('Вход выполнен успешно!', 'success');
                     setTimeout(() => window.location.href = 'account.html', 1000);
                 } else {
@@ -174,7 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
        ======================================================================== */
     const accountUsername = document.getElementById('account-username');
     
-    // Проверка логина для страницы аккаунта
     if (accountUsername) { 
         if (localStorage.getItem('isLoggedIn') !== 'true') {
             window.location.href = 'login.html';
@@ -184,20 +200,20 @@ document.addEventListener('DOMContentLoaded', () => {
             
             document.getElementById('logout-button').addEventListener('click', () => {
                 localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('kitchenShopUserId');
                 localStorage.removeItem('kitchenShopUserName');
                 localStorage.removeItem('kitchenShopUserEmail');
+                
+                updateProfileIcon(); // Возвращаем обычную иконку
                 showNotify('Вы вышли из аккаунта', 'info');
                 setTimeout(() => window.location.href = 'login.html', 1000);
             });
         }
     }
 
-    // Иконка профиля в шапке
     const profileLink = document.getElementById('profile-link');
     if (profileLink && localStorage.getItem('isLoggedIn') === 'true') {
         profileLink.href = 'account.html';
-        // Можно добавить визуальный индикатор (например, цвет иконки), что пользователь вошел
-        profileLink.style.color = '#E24C55'; 
     }
 
 
@@ -231,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             localStorage.setItem('shoppingCart', JSON.stringify(cart));
             showNotify('Товар добавлен в корзину', 'success');
-            updateCartCount(); // Обновить счетчик (функция ниже)
+            updateCartCount();
         });
     }
 
@@ -259,14 +275,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (checkoutBtn && modal) {
             checkoutBtn.addEventListener('click', () => {
                 
-                // 1. ПРОВЕРКА АВТОРИЗАЦИИ (ИСПРАВЛЕННАЯ)
-                const isLogged = localStorage.getItem('isLoggedIn');
-                console.log('Статус входа при нажатии кнопки:', isLogged); // Смотри в консоль F12
-
-                if (isLogged !== 'true') {
-                    showNotify('Для оформления заказа необходимо войти в аккаунт!', 'error');
-                    // Даем пользователю время прочитать сообщение перед переадресацией
-                    setTimeout(() => window.location.href = 'login.html', 2000);
+                // === 1. ПРОВЕРКА ПО ИКОНКЕ (VISUAL CHECK) ===
+                const profileIcon = document.querySelector('#profile-link i');
+                
+                // Если у иконки НЕТ класса с галочкой - значит не авторизован
+                if (!profileIcon || !profileIcon.classList.contains('fa-user-check')) {
+                    showNotify('Войдите в аккаунт для оформления заказа!', 'error');
+                    setTimeout(() => window.location.href = 'login.html', 1500);
                     return; 
                 }
 
@@ -296,7 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const name = document.getElementById('purchase-name').value;
                     const phone = document.getElementById('purchase-phone').value;
                     const address = document.getElementById('purchase-address').value;
-                    
+                    const userId = localStorage.getItem('kitchenShopUserId'); // Получаем ID
+
                     // Валидация
                     if (name.trim() === '') {
                         showNotify('Введите ваше имя', 'error'); return;
@@ -312,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const response = await fetch('/api/checkout', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ name, phone, address })
+                            body: JSON.stringify({ name, phone, address, userId })
                         });
                         
                         const data = await response.json();
@@ -398,10 +414,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalEl = document.getElementById('cart-total-price');
         if(totalEl) totalEl.innerText = total.toLocaleString() + ' руб.';
         
-        updateCartCount(); // Обновляем бадж в шапке
+        updateCartCount();
     }
 
-    // Хелпер: Обновление счетчика корзины в шапке
     function updateCartCount() {
         let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
         let totalQty = 0;
@@ -409,9 +424,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const badge = document.getElementById('cart-count');
         if (badge) badge.innerText = totalQty;
     }
-    updateCartCount(); // Запуск при загрузке
+    updateCartCount();
 
-    // Глобальные функции для HTML onclick
     window.removeItem = function(index) {
         let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
         cart.splice(index, 1);
