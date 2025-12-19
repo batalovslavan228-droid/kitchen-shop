@@ -1660,3 +1660,300 @@ button:disabled {
         align-items: center;
     }
 }
+/* ============================================================
+   АДАПТИВНОСТЬ ДЛЯ КОРЗИНЫ И ФОРМЫ ЗАКАЗА
+   ============================================================ */
+
+/* 1. Контейнер корзины на мобильных */
+@media (max-width: 768px) {
+    .cart-container {
+        flex-direction: column !important;
+        gap: 20px;
+    }
+    
+    .cart-items {
+        width: 100% !important;
+        order: 1;
+    }
+    
+    .cart-summary {
+        width: 100% !important;
+        order: 2;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 20px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        border-radius: 10px 10px 0 0;
+    }
+    
+    /* Карточки товаров в корзине */
+    .cart-item {
+        flex-direction: column !important;
+        padding: 15px !important;
+        gap: 15px !important;
+    }
+    
+    .cart-checkbox {
+        position: absolute !important;
+        top: 10px;
+        left: 10px;
+        z-index: 2;
+    }
+    
+    .cart-img-wrapper {
+        width: 100% !important;
+        text-align: center;
+    }
+    
+    .cart-img-wrapper img {
+        max-width: 200px !important;
+        height: auto !important;
+    }
+    
+    .cart-item-info {
+        width: 100% !important;
+        text-align: center;
+    }
+    
+    .cart-controls {
+        width: 100% !important;
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+    
+    .quantity-control {
+        width: 100% !important;
+        max-width: 200px;
+        justify-content: center;
+    }
+    
+    .cart-actions-links {
+        width: 100% !important;
+        justify-content: center;
+        gap: 20px;
+    }
+    
+    .cart-price-block {
+        width: 100% !important;
+        text-align: center;
+        flex-direction: row;
+        justify-content: center;
+        gap: 15px;
+    }
+}
+
+/* 2. Модальное окно оформления заказа на мобильных */
+@media (max-width: 768px) {
+    .modal {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 10px auto !important;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .form-container {
+        padding: 15px !important;
+    }
+    
+    .form-group {
+        margin-bottom: 15px !important;
+    }
+    
+    .form-group input {
+        padding: 12px !important;
+        font-size: 16px !important; /* Увеличиваем для мобильных */
+    }
+    
+    .form-button {
+        padding: 14px !important;
+        font-size: 16px !important;
+        width: 100% !important;
+    }
+    
+    /* Кнопка закрытия модалки больше для пальца */
+    .modal-close {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 28px !important;
+        line-height: 40px !important;
+    }
+}
+
+/* 3. Очень маленькие экраны (меньше 480px) */
+@media (max-width: 480px) {
+    .cart-item {
+        margin-bottom: 20px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 10px !important;
+    }
+    
+    .quantity-btn {
+        width: 35px !important;
+        height: 35px !important;
+        font-size: 18px !important;
+    }
+    
+    .quantity-value {
+        width: 40px !important;
+        font-size: 16px !important;
+    }
+    
+    .buy-button, 
+    .reset-filters {
+        width: 100% !important;
+        padding: 14px !important;
+        font-size: 16px !important;
+    }
+    
+    /* Заголовки и текст */
+    h1 {
+        font-size: 24px !important;
+        text-align: center;
+    }
+    
+    .breadcrumbs {
+        font-size: 14px;
+        padding: 10px;
+    }
+    
+    /* Модалка на весь экран */
+    .modal-overlay.active {
+        padding: 10px !important;
+    }
+    
+    .modal {
+        border-radius: 0 !important;
+        max-height: 100vh !important;
+        height: 100vh !important;
+    }
+}
+
+/* 4. Горизонтальная ориентация на телефонах */
+@media (max-width: 768px) and (orientation: landscape) {
+    .cart-container {
+        flex-direction: row !important;
+        flex-wrap: wrap;
+    }
+    
+    .cart-items {
+        width: 60% !important;
+    }
+    
+    .cart-summary {
+        width: 35% !important;
+    }
+    
+    .modal {
+        width: 80% !important;
+        max-height: 80vh;
+    }
+}
+
+/* 5. Для iPad и планшетов в портретной ориентации */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .cart-container {
+        gap: 30px;
+    }
+    
+    .cart-items {
+        width: 65% !important;
+    }
+    
+    .cart-summary {
+        width: 30% !important;
+    }
+    
+    .cart-item {
+        padding: 20px !important;
+    }
+}
+
+/* 6. Адаптивность формы в модальном окне */
+@media (max-width: 768px) {
+    .form-container h1 {
+        font-size: 22px !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .form-group label {
+        font-size: 15px !important;
+        margin-bottom: 5px !important;
+    }
+    
+    .error-message {
+        font-size: 13px !important;
+        margin-top: 3px !important;
+    }
+}
+
+/* 7. Пустая корзина на мобильных */
+@media (max-width: 768px) {
+    #cart-items-container > div {
+        padding: 30px 20px !important;
+        text-align: center;
+    }
+    
+    #cart-items-container i.fa-shopping-basket {
+        font-size: 60px !important;
+        margin-bottom: 20px !important;
+    }
+    
+    #cart-items-container p {
+        font-size: 18px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    #cart-items-container a {
+        font-size: 16px !important;
+        padding: 10px 20px !important;
+        display: inline-block;
+        background: #E24C55;
+        color: white !important;
+        border-radius: 5px;
+        text-decoration: none !important;
+    }
+}
+
+/* 8. Хлебные крошки и навигация в корзине */
+@media (max-width: 768px) {
+    .breadcrumbs {
+        padding: 15px !important;
+        font-size: 14px;
+        flex-wrap: wrap;
+    }
+    
+    .main-nav ul {
+        overflow-x: auto;
+        padding-bottom: 5px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .main-nav li {
+        white-space: nowrap;
+    }
+    
+    .active-link {
+        font-weight: bold;
+        border-bottom: 2px solid #E24C55;
+    }
+}
+
+/* 9. Итоговая сумма в корзине на мобильных */
+@media (max-width: 768px) {
+    .summary-row {
+        font-size: 16px !important;
+        padding: 8px 0 !important;
+    }
+    
+    .summary-row.total {
+        font-size: 20px !important;
+        font-weight: bold;
+        padding: 12px 0 !important;
+        border-top: 2px solid #eee;
+        margin-top: 10px;
+    }
+}
