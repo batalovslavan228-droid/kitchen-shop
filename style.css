@@ -83,39 +83,6 @@ main {
     color: #E24C55;
 }
 
-/* --- ПОИСК --- */
-.search-bar {
-    display: flex;
-    border: 2px solid #E24C55; /* Акцентная рамка */
-    border-radius: 8px;
-    overflow: hidden;
-    height: 44px;
-    width: 400px;
-    margin: 0 30px;
-}
-
-.search-bar input {
-    border: none;
-    padding: 0 15px;
-    font-size: 15px;
-    flex-grow: 1;
-    outline: none;
-}
-
-.search-bar button {
-    background: #E24C55;
-    border: none;
-    padding: 0 20px;
-    cursor: pointer;
-    color: #fff;
-    font-size: 18px;
-    transition: background 0.3s;
-}
-
-.search-bar button:hover {
-    background: #c0392b;
-}
-
 /* --- ИКОНКИ (Профиль, Корзина) --- */
 .header-icons {
     display: flex;
