@@ -1,6 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     /* ========================================================================
+       0. СИСТЕМА УВЕДОМЛЕНИЙ (ВМЕСТО ALERT)
+       ======================================================================== */
+    // Создаем контейнер для уведомлений, если его нет
+    let notifyContainer = document.getElementById('notification-container');
+    if (!notifyContainer) {
+        notifyContainer = document.createElement('div');
+        notifyContainer.id = 'notification-container';
+        document.body.appendChild(notifyContainer);
+    }
+
+    // Функция показа уведомления
+    // type может быть: 'success' (зеленый), 'error' (красный), 'info' (синий)
+    function showNotify(message, type = 'info') {
+        const notify = document.createElement('div');
+        notify.classList.add('notification', type);
+        notify.innerText = message;
+
+        notifyContainer.appendChild(notify);
+
+        // Удаляем через 3 секунды
+        setTimeout(() => {
+            notify.style.animation = 'fadeOut 0.3s forwards';
+            notify.addEventListener('animationend', () => {
+                notify.remove();
+            });
+        }, 3000);
+    }
+
+
+    /* ========================================================================
        1. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (ВАЛИДАЦИИ)
        ======================================================================== */
     function setError(element, message) {
@@ -30,18 +60,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return re.test(String(email).toLowerCase());
     }
 
-    // НОВАЯ ФУНКЦИЯ: Проверка телефона
     function isValidPhone(phone) {
-        // Разрешаем цифры, +, -, скобки и пробелы
         const re = /^[\d\+\-\(\)\s]+$/;
-        // Проверяем, что символы правильные И что цифр не меньше 10
         const digits = phone.replace(/\D/g, ''); 
         return re.test(phone) && digits.length >= 10 && digits.length <= 15;
     }
 
 
     /* ========================================================================
-       2. РЕГИСТРАЦИЯ (ОТПРАВКА НА СЕРВЕР)
+       2. РЕГИСТРАЦИЯ
        ======================================================================== */
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
@@ -71,23 +98,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Регистрация успешна! Теперь войдите.');
-                        window.location.href = 'login.html';
+                        showNotify('Регистрация успешна! Теперь войдите.', 'success');
+                        setTimeout(() => window.location.href = 'login.html', 1500);
                     } else {
-                        alert('Ошибка: ' + data.message);
+                        showNotify('Ошибка: ' + data.message, 'error');
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotify('Ошибка соединения с сервером', 'error');
+                });
             }
         });
     }
 
 
     /* ========================================================================
-       3. ВХОД (ЗАПРОС К СЕРВЕРУ)
+       3. ВХОД
        ======================================================================== */
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
+        // Проверка при загрузке страницы входа
         if (localStorage.getItem('isLoggedIn') === 'true') {
             window.location.href = 'account.html';
         }
@@ -113,12 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // ВАЖНО: Устанавливаем флаг входа
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('kitchenShopUserName', data.user.username);
                     localStorage.setItem('kitchenShopUserEmail', data.user.email);
                     
-                    alert('Вход выполнен!');
-                    window.location.href = 'account.html';
+                    showNotify('Вход выполнен успешно!', 'success');
+                    setTimeout(() => window.location.href = 'account.html', 1000);
                 } else {
                     setError(email, '');
                     setError(password, '');
@@ -126,9 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         loginError.textContent = data.message;
                         loginError.style.display = 'block';
                     }
+                    showNotify(data.message, 'error');
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                showNotify('Ошибка сервера', 'error');
+            });
         });
     }
 
@@ -138,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
        ======================================================================== */
     const accountUsername = document.getElementById('account-username');
     
+    // Проверка логина для страницы аккаунта
     if (accountUsername) { 
         if (localStorage.getItem('isLoggedIn') !== 'true') {
             window.location.href = 'login.html';
@@ -149,24 +186,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('kitchenShopUserName');
                 localStorage.removeItem('kitchenShopUserEmail');
-                window.location.href = 'login.html';
+                showNotify('Вы вышли из аккаунта', 'info');
+                setTimeout(() => window.location.href = 'login.html', 1000);
             });
         }
     }
 
+    // Иконка профиля в шапке
     const profileLink = document.getElementById('profile-link');
     if (profileLink && localStorage.getItem('isLoggedIn') === 'true') {
         profileLink.href = 'account.html';
+        // Можно добавить визуальный индикатор (например, цвет иконки), что пользователь вошел
+        profileLink.style.color = '#E24C55'; 
     }
 
 
     /* ========================================================================
-       5. КОРЗИНА (ОФОРМЛЕНИЕ ЗАКАЗА В БД + ПРОВЕРКИ)
+       5. КОРЗИНА
        ======================================================================== */
     
-    // А. Кнопка "Добавить в корзину"
+    // А. Добавление в корзину
     const addToCartBtn = document.getElementById('buy-now-btn');
-    
     if (addToCartBtn) {
         addToCartBtn.addEventListener('click', () => {
             const title = document.querySelector('.product-info h1').innerText;
@@ -174,51 +214,43 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let imageSrc = '';
             const mainGalImg = document.getElementById('main-product-img');
-            if (mainGalImg) {
-                imageSrc = mainGalImg.src;
-            } else {
+            if (mainGalImg) imageSrc = mainGalImg.src;
+            else {
                 const simpleImg = document.querySelector('.product-image img');
                 if(simpleImg) imageSrc = simpleImg.src;
             }
 
             let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-            
             let existingProduct = cart.find(item => item.name === title);
 
             if (existingProduct) {
                 existingProduct.quantity = (existingProduct.quantity || 1) + 1;
             } else {
-                cart.push({ 
-                    name: title, 
-                    price: price, 
-                    image: imageSrc, 
-                    quantity: 1 
-                });
+                cart.push({ name: title, price: price, image: imageSrc, quantity: 1 });
             }
             
             localStorage.setItem('shoppingCart', JSON.stringify(cart));
-            alert('Товар добавлен в корзину!');
+            showNotify('Товар добавлен в корзину', 'success');
+            updateCartCount(); // Обновить счетчик (функция ниже)
         });
     }
 
-    // Б. Страница Корзины и Модальное окно
+    // Б. Страница Корзины
     const cartItemsContainer = document.getElementById('cart-items-container');
-    
     if (cartItemsContainer) {
         renderCart(); 
 
-        // Кнопка очистки
         const clearBtn = document.getElementById('clear-cart-btn');
         if(clearBtn) {
             clearBtn.addEventListener('click', () => {
                 if(confirm('Вы уверены, что хотите очистить корзину?')) {
                     localStorage.removeItem('shoppingCart');
                     renderCart();
+                    showNotify('Корзина очищена', 'info');
                 }
             });
         }
 
-        // Модальное окно
         const checkoutBtn = document.getElementById('checkout-btn');
         const modal = document.getElementById('purchase-modal');
         const closeModal = document.getElementById('modal-close-btn');
@@ -226,19 +258,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (checkoutBtn && modal) {
             checkoutBtn.addEventListener('click', () => {
-                // 1. ПРОВЕРКА: Авторизован ли пользователь?
-                if (localStorage.getItem('isLoggedIn') !== 'true') {
-                    alert('Для оформления заказа необходимо войти в аккаунт!');
-                    window.location.href = 'login.html';
-                    return; // Прерываем функцию, окно не откроется
+                
+                // 1. ПРОВЕРКА АВТОРИЗАЦИИ (ИСПРАВЛЕННАЯ)
+                const isLogged = localStorage.getItem('isLoggedIn');
+                console.log('Статус входа при нажатии кнопки:', isLogged); // Смотри в консоль F12
+
+                if (isLogged !== 'true') {
+                    showNotify('Для оформления заказа необходимо войти в аккаунт!', 'error');
+                    // Даем пользователю время прочитать сообщение перед переадресацией
+                    setTimeout(() => window.location.href = 'login.html', 2000);
+                    return; 
                 }
 
-                // 2. ПРОВЕРКА: Не пустая ли корзина?
+                // 2. Проверка пустоты корзины
                 const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
                 if (cart.length === 0) {
-                    alert('Корзина пуста!');
+                    showNotify('Корзина пуста!', 'error');
                 } else {
-                    // Если все ок, открываем окно
                     modal.classList.add('active');
                 }
             });
@@ -252,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(e.target === modal) modal.classList.remove('active');
             });
 
-            // --- ОТПРАВКА ЗАКАЗА НА СЕРВЕР ---
+            // Отправка заказа
             if(purchaseForm) {
                 purchaseForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
@@ -261,22 +297,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     const phone = document.getElementById('purchase-phone').value;
                     const address = document.getElementById('purchase-address').value;
                     
-                    // 3. ПРОВЕРКА: Валидация полей
+                    // Валидация
                     if (name.trim() === '') {
-                        alert('Введите ваше имя');
-                        return;
+                        showNotify('Введите ваше имя', 'error'); return;
                     }
                     if (!isValidPhone(phone)) {
-                        alert('Введите корректный номер телефона (минимум 10 цифр)');
-                        return;
+                        showNotify('Некорректный телефон (мин. 10 цифр)', 'error'); return;
                     }
                     if (address.trim() === '') {
-                        alert('Введите адрес доставки');
-                        return;
+                        showNotify('Введите адрес доставки', 'error'); return;
                     }
                         
                     try {
-                        // Отправляем данные на API
                         const response = await fetch('/api/checkout', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -286,25 +318,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         const data = await response.json();
 
                         if (data.success) {
-                            // Если сервер сказал ОК
-                            alert(`Спасибо, ${name}! Заказ №${data.orderId} успешно оформлен.`);
+                            showNotify(`Заказ №${data.orderId} успешно оформлен!`, 'success');
                             localStorage.removeItem('shoppingCart'); 
                             modal.classList.remove('active');
                             purchaseForm.reset();
                             renderCart();
                         } else {
-                            alert('Ошибка сервера: ' + data.message);
+                            showNotify('Ошибка сервера: ' + data.message, 'error');
                         }
                     } catch (err) {
                         console.error(err);
-                        alert('Ошибка соединения с сервером');
+                        showNotify('Ошибка соединения с сервером', 'error');
                     }
                 });
             }
         }
     }
 
-    // В. Отрисовка корзины
+    // В. Отрисовка
     function renderCart() {
         if (!cartItemsContainer) return;
 
@@ -341,18 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 itemDiv.classList.add('cart-item');
                 
                 itemDiv.innerHTML = `
-                    <div class="cart-checkbox">
-                        <i class="fas fa-check-square" style="color: #E24C55;"></i>
-                    </div>
-
-                    <div class="cart-img-wrapper">
-                        <img src="${item.image}" alt="${item.name}">
-                    </div>
-
-                    <div class="cart-item-info">
-                        <h3>${item.name}</h3>
-                    </div>
-
+                    <div class="cart-checkbox"><i class="fas fa-check-square" style="color: #E24C55;"></i></div>
+                    <div class="cart-img-wrapper"><img src="${item.image}" alt="${item.name}"></div>
+                    <div class="cart-item-info"><h3>${item.name}</h3></div>
                     <div class="cart-controls">
                         <div class="quantity-control">
                             <button class="quantity-btn" onclick="changeQuantity(${index}, -1)">-</button>
@@ -361,10 +383,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="cart-actions-links">
                             <span class="action-link" onclick="removeItem(${index})">Удалить</span>
-                            <span class="action-link">В избранное</span>
+                            <span class="action-link add-from-cart-to-fav" data-idx="${index}">В избранное</span>
                         </div>
                     </div>
-
                     <div class="cart-price-block">
                         <span class="price-current">${(priceNumber * qty).toLocaleString()} ₽</span>
                         <span class="price-old">${(oldPriceNumber * qty).toLocaleString()} ₽</span>
@@ -374,21 +395,31 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        const countEl = document.getElementById('cart-count');
         const totalEl = document.getElementById('cart-total-price');
-        if(countEl) countEl.innerText = totalCount + ' шт.';
         if(totalEl) totalEl.innerText = total.toLocaleString() + ' руб.';
+        
+        updateCartCount(); // Обновляем бадж в шапке
     }
 
-    // Удаление
+    // Хелпер: Обновление счетчика корзины в шапке
+    function updateCartCount() {
+        let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+        let totalQty = 0;
+        cart.forEach(item => totalQty += (item.quantity || 1));
+        const badge = document.getElementById('cart-count');
+        if (badge) badge.innerText = totalQty;
+    }
+    updateCartCount(); // Запуск при загрузке
+
+    // Глобальные функции для HTML onclick
     window.removeItem = function(index) {
         let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
         cart.splice(index, 1);
         localStorage.setItem('shoppingCart', JSON.stringify(cart));
         renderCart();
+        showNotify('Товар удален', 'info');
     };
 
-    // Изменение количества
     window.changeQuantity = function(index, change) {
         let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
         if (cart[index]) {
@@ -403,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /* ========================================================================
-       6. ГАЛЕРЕЯ ИЗОБРАЖЕНИЙ
+       6. ГАЛЕРЕЯ
        ======================================================================== */
     const mainImage = document.getElementById('main-product-img');
     const thumbs = document.querySelectorAll('.gallery-thumb');
@@ -412,37 +443,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (mainImage && thumbs.length > 0) {
         let currentIndex = 0;
-
         function updateGallery(index) {
             thumbs.forEach(t => t.classList.remove('active'));
             thumbs[index].classList.add('active');
-            
             const newSrc = thumbs[index].getAttribute('src');
             mainImage.style.opacity = 0;
-            setTimeout(() => {
-                mainImage.src = newSrc;
-                mainImage.style.opacity = 1;
-            }, 200);
-            
+            setTimeout(() => { mainImage.src = newSrc; mainImage.style.opacity = 1; }, 200);
             currentIndex = index;
         }
-
-        thumbs.forEach((thumb, index) => {
-            thumb.addEventListener('click', () => updateGallery(index));
+        thumbs.forEach((thumb, index) => thumb.addEventListener('click', () => updateGallery(index)));
+        if (arrowPrev) arrowPrev.addEventListener('click', () => {
+            let newIndex = currentIndex - 1;
+            if (newIndex < 0) newIndex = thumbs.length - 1;
+            updateGallery(newIndex);
         });
-
-        if (arrowPrev && arrowNext) {
-            arrowPrev.addEventListener('click', () => {
-                let newIndex = currentIndex - 1;
-                if (newIndex < 0) newIndex = thumbs.length - 1;
-                updateGallery(newIndex);
-            });
-            arrowNext.addEventListener('click', () => {
-                let newIndex = currentIndex + 1;
-                if (newIndex >= thumbs.length) newIndex = 0;
-                updateGallery(newIndex);
-            });
-        }
+        if (arrowNext) arrowNext.addEventListener('click', () => {
+            let newIndex = currentIndex + 1;
+            if (newIndex >= thumbs.length) newIndex = 0;
+            updateGallery(newIndex);
+        });
     }
 
 
@@ -458,7 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 hintContent: 'Магазин "КухняТех"',
                 balloonContent: 'Мы здесь!'
             }, { preset: 'islands#redDotIcon' }));
-            
             map.controls.remove('searchControl');
             map.controls.remove('trafficControl');
         });
@@ -466,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /* ========================================================================
-       8. ИЗБРАННОЕ (ЛОГИКА)
+       8. ИЗБРАННОЕ
        ======================================================================== */
     const favButtons = document.querySelectorAll('.add-to-favorites, .add-to-favorites-catalog');
     let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
@@ -475,30 +493,20 @@ document.addEventListener('DOMContentLoaded', () => {
         favButtons.forEach(btn => {
             const id = btn.getAttribute('data-id');
             const icon = btn.querySelector('i');
-            
             if(!id || !icon) return;
-
             const exists = favorites.some(item => item.id === id);
-            
             if (exists) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                icon.style.color = '#E24C55';
+                icon.classList.remove('far'); icon.classList.add('fas'); icon.style.color = '#E24C55';
             } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                icon.style.color = '';
+                icon.classList.remove('fas'); icon.classList.add('far'); icon.style.color = '';
             }
         });
     }
-
     updateHeartIcons();
 
     favButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.preventDefault(); 
-            e.stopPropagation(); 
-
+            e.preventDefault(); e.stopPropagation(); 
             const product = {
                 id: btn.getAttribute('data-id'),
                 name: btn.getAttribute('data-name'),
@@ -506,17 +514,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 img: btn.getAttribute('data-img'),
                 link: btn.getAttribute('data-link')
             };
-
             if (!product.id) return; 
-
             const index = favorites.findIndex(item => item.id === product.id);
-
             if (index === -1) {
                 favorites.push(product);
+                showNotify('Добавлено в избранное', 'success');
             } else {
                 favorites.splice(index, 1);
+                showNotify('Удалено из избранного', 'info');
             }
-
             localStorage.setItem('myFavorites', JSON.stringify(favorites));
             updateHeartIcons();
         });
@@ -527,7 +533,6 @@ document.addEventListener('DOMContentLoaded', () => {
        9. ОТРИСОВКА ИЗБРАННОГО
        ======================================================================== */
     const favoritesContainer = document.getElementById('favorites-container');
-
     if (favoritesContainer) {
         renderFavoritesPage();
     }
@@ -537,12 +542,10 @@ document.addEventListener('DOMContentLoaded', () => {
         favoritesContainer.innerHTML = '';
 
         if (favorites.length === 0) {
-            favoritesContainer.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #888;">
-                    <i class="far fa-heart" style="font-size: 60px; margin-bottom: 20px; opacity: 0.3;"></i>
-                    <h2>Список избранного пуст</h2>
-                    <p>Перейдите в <a href="catalog.html" style="color: #E24C55;">каталог</a>, чтобы добавить товары.</p>
-                </div>`;
+            favoritesContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #888;">
+                <i class="far fa-heart" style="font-size: 60px; margin-bottom: 20px; opacity: 0.3;"></i>
+                <h2>Список избранного пуст</h2>
+                <p>Перейдите в <a href="catalog.html" style="color: #E24C55;">каталог</a></p></div>`;
             return;
         }
 
@@ -550,21 +553,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.classList.add('product-card');
             card.style.position = 'relative';
-
             card.innerHTML = `
                 <button class="remove-from-fav" data-id="${item.id}" style="position: absolute; top: 10px; right: 10px; z-index: 10; background: white; border: 1px solid #eee; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display:flex; align-items:center; justify-content:center;">
                     <i class="fas fa-times" style="color: #888;"></i>
                 </button>
-
                 <a href="${item.link}" class="product-clickable-area" style="text-decoration:none; color:inherit;">
                     <div class="image-container" style="text-align:center; margin-bottom:10px;">
                         <img src="${item.img}" alt="${item.name}" style="max-width:100%; height:150px; object-fit:contain;">
                     </div>
                     <div class="product-info-bottom" style="padding:10px;">
                         <h3 style="font-size:16px; margin: 10px 0;">${item.name}</h3>
-                        <div class="price-container">
-                            <span class="price" style="font-weight:bold; color:#E24C55; font-size:18px;">${item.price}</span>
-                        </div>
+                        <div class="price-container"><span class="price" style="font-weight:bold; color:#E24C55; font-size:18px;">${item.price}</span></div>
                     </div>
                 </a>
             `;
@@ -582,4 +581,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-}); // Конец DOMContentLoaded
+});
