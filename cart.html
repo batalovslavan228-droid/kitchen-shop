@@ -12,15 +12,15 @@
     <header class="site-header">
         <div class="header-top-row">
             <a href="index.html" class="logo">
-    <div class="logo-icon"><i class="fas fa-blender"></i></div>
-    <div class="logo-text">KITCHEN<span>POT</span></div>
-</a>
+                <div class="logo-icon"><i class="fas fa-blender"></i></div>
+                <div class="logo-text">KITCHEN<span>POT</span></div>
+            </a>
             <div class="header-icons">
                 <a href="favorites.html" aria-label="Избранное"><i class="far fa-heart"></i></a>
                 
                 <a href="login.html" id="profile-link" aria-label="Профиль"><i class="far fa-user"></i></a>
                 
-                <a href="cart.html" aria-label="Корзина"><i class="fas fa-shopping-cart"></i></a>
+                <a href="cart.html" aria-label="Корзина" class="active-link"><i class="fas fa-shopping-cart"></i></a>
             </div>
         </div>
         <div class="header-bottom-row">
@@ -29,7 +29,7 @@
                     <li><a href="index.html">Главная</a></li>
                     <li><a href="catalog.html">Товары</a></li>
                     <li><a href="contacts.html">Контакты</a></li>
-                    <li><a href="cart.html" class="active-link">Корзина</a></li>
+                    <li><a href="cart.html">Корзина</a></li>
                 </ul>
             </nav>
         </div>
@@ -96,5 +96,26 @@
 
     <script src="script.js"></script>
     
+    <script>
+        (function() {
+            // Проверяем память браузера
+            const isLogged = localStorage.getItem('isLoggedIn');
+            
+            // Находим элементы
+            const profileLink = document.getElementById('profile-link');
+            const icon = profileLink ? profileLink.querySelector('i') : null;
+
+            // Если вошли и элементы найдены — меняем вид принудительно
+            if (isLogged === 'true' && icon) {
+                // Меняем класс иконки на галочку
+                icon.className = 'fas fa-user-check';
+                // Красим в зеленый
+                icon.style.color = '#4CAF50';
+                // Меняем ссылку, чтобы вела в кабинет, а не на вход
+                profileLink.href = 'account.html';
+                profileLink.title = 'Вы авторизованы';
+            }
+        })();
+    </script>
 </body>
 </html>
